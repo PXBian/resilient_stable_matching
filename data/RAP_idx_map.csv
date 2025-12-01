@@ -1,0 +1,601 @@
+side,index,id,name_or_title,topic
+reviewer,1,A000251,andrew mccallum,T131
+reviewer,2,A000535,boualem benatallah,T107
+reviewer,3,A000588,c. lee giles,T144
+reviewer,4,A000776,christopher meek,T131
+reviewer,5,A001183,dunja mladenic,T144
+reviewer,6,A001318,eugene agichtein,T16
+reviewer,7,A001414,floriana esposito,T131
+reviewer,8,A002122,ji-rong wen,T144
+reviewer,9,A002382,jure leskovec,T144
+reviewer,10,A002698,lise getoor,T16
+reviewer,11,A003434,omid madani,T131
+reviewer,12,A003578,pedro domingos,T145
+reviewer,13,A003810,raymond t. ng,T131
+reviewer,14,A003975,rong jin,T16
+reviewer,15,A004130,sergey brin,T144
+reviewer,16,A004271,soumen chakrabarti,T144
+reviewer,17,A004509,thomas hofmann,T16
+reviewer,18,A005069,zheng chen,T144
+reviewer,19,A000024,ada wai-chee fu,T16
+reviewer,20,A000029,adam kowalczyk,T16
+reviewer,21,A000053,aixin sun,T144
+reviewer,22,A000108,alex dekhtyar,T131
+reviewer,23,A000115,alexander borgida,T145
+reviewer,24,A000121,alexander hinneburg,T16
+reviewer,25,A000132,alexander tuzhilin,T16
+reviewer,26,A000168,alon y. halevy,T145
+reviewer,27,A000189,amir globerson,T131
+reviewer,28,A000192,amit p. sheth,T145
+reviewer,29,A000196,amos j. storkey,T131
+reviewer,30,A000234,andreas harth,T144
+reviewer,31,A000254,andrew tomkins,T144
+reviewer,32,A000257,andrew w. moore,T16
+reviewer,33,A000265,angela bonifati,T144
+reviewer,34,A000269,anhai doan,T145
+reviewer,35,A000325,anupriya ankolekar,T144
+reviewer,36,A000345,arnaud sahuguet,T144
+reviewer,37,A000348,arne-jorgen berre,T107
+reviewer,38,A000380,asuncion gomez-perez,T144
+reviewer,39,A000381,ata kaban,T16
+reviewer,40,A000383,athman bouguettaya,T107
+reviewer,41,A000387,atsuyoshi nakamura,T16
+reviewer,42,A000396,avigdor gal,T145
+reviewer,43,A000414,bamshad mobasher,T144
+reviewer,44,A000416,baoshi yan,T144
+reviewer,45,A000446,belle l. tseng,T144
+reviewer,46,A000456,benjamin n. grosof,T131
+reviewer,47,A000476,bernhard pfahringer,T16
+reviewer,48,A000482,bertram ludascher,T145
+reviewer,49,A000484,bettina berendt,T144
+reviewer,50,A000489,bharat kumar,T107
+reviewer,51,A000490,bhaskara marthi,T131
+reviewer,52,A000492,bhavani raskutti,T131
+reviewer,53,A000495,bianca zadrozny,T16
+reviewer,54,A000503,bin he,T16
+reviewer,55,A000507,bing liu,T144
+reviewer,56,A000518,blai bonet,T131
+reviewer,57,A000548,brendan j. frey,T131
+reviewer,58,A000579,byeong man kim,T144
+reviewer,59,A000580,byron dom,T131
+reviewer,60,A000597,calton pu,T107
+reviewer,61,A000657,changzhou wang,T107
+reviewer,62,A000665,charles elkan,T16
+reviewer,63,A000676,charles x. ling,T16
+reviewer,64,A000677,charu c. aggarwal,T16
+reviewer,65,A000680,chen li,T145
+reviewer,66,A000711,chris clifton,T16
+reviewer,67,A000726,christian bohm,T16
+reviewer,68,A000727,christian borgelt,T131
+reviewer,69,A000738,christian r. shelton,T131
+reviewer,70,A000750,christof bornhovd,T107
+reviewer,71,A000752,christoph bussler,T107
+reviewer,72,A000763,christopher c. yang,T144
+reviewer,73,A000773,christopher m. bishop,T131
+reviewer,74,A000784,christos faloutsos,T16
+reviewer,75,A000808,clark glymour,T131
+reviewer,76,A000827,clement t. yu,T24
+reviewer,77,A000838,constantin f. aliferis,T16
+reviewer,78,A000875,dale schuurmans,T131
+reviewer,79,A000898,daniel barbara,T16
+reviewer,80,A000911,daniel j. weitzner,T144
+reviewer,81,A000916,daniel oberle,T144
+reviewer,82,A000935,daphne koller,T131
+reviewer,83,A000962,david d. lewis,T162
+reviewer,84,A000983,david huynh,T144
+reviewer,85,A000990,david jensen,T16
+reviewer,86,A001004,david madigan,T131
+reviewer,87,A001006,david maxwell chickering,T131
+reviewer,88,A001039,davood rafiei,T144
+reviewer,89,A001069,dennis decoste,T16
+reviewer,90,A001100,dieter fensel,T144
+reviewer,91,A001112,dimitrios gunopulos,T16
+reviewer,92,A001116,dimitris plexousakis,T145
+reviewer,93,A001134,dmitry pavlov,T131
+reviewer,94,A001152,donald kossmann,T144
+reviewer,95,A001156,donato malerba,T16
+reviewer,96,A001197,edleno silva de moura,T144
+reviewer,97,A001216,ee-peng lim,T24
+reviewer,98,A001223,eibe frank,T16
+reviewer,99,A001262,emilia cimpian,T107
+reviewer,100,A001297,eric p. xing,T131
+reviewer,101,A001334,evgeniy gabrilovich,T144
+reviewer,102,A001335,evren sirin,T144
+reviewer,103,A001357,fabrizio silvestri,T144
+reviewer,104,A001368,farshad hakimpour,T107
+reviewer,105,A001372,fausto rabitti,T24
+reviewer,106,A001417,foster j. provost,T16
+reviewer,107,A001424,francesco bergadano,T131
+reviewer,108,A001453,frank klawonn,T131
+reviewer,109,A001460,frank van harmelen,T144
+reviewer,110,A001505,gao cong,T16
+reviewer,111,A001514,gary hallmark,T145
+reviewer,112,A001515,gary m. weiss,T16
+reviewer,113,A001534,geoffrey i. webb,T16
+reviewer,114,A001537,georg lausen,T145
+reviewer,115,A001538,george a. mihaila,T144
+reviewer,116,A001540,george forman,T16
+reviewer,117,A001544,george kollios,T16
+reviewer,118,A001551,georges dupret,T144
+reviewer,119,A001585,gianluca demartini,T144
+reviewer,120,A001618,glenn fung,T16
+reviewer,121,A001639,gregory f. cooper,T131
+reviewer,122,A001692,hagai attias,T131
+reviewer,123,A001703,haixun wang,T16
+reviewer,124,A001728,hans-peter kriegel,T16
+reviewer,125,A001738,harald steck,T131
+reviewer,126,A001753,hasan m. jamil,T16
+reviewer,127,A001770,hendrik blockeel,T16
+reviewer,128,A001771,heng tao shen,T16
+reviewer,129,A001802,hiroshi motoda,T16
+reviewer,130,A001807,hisashi kashima,T16
+reviewer,131,A001829,hongjun lu,T16
+reviewer,132,A001833,hongyuan zha,T16
+reviewer,133,A001846,hua-jun zeng,T16
+reviewer,134,A001849,huan liu,T16
+reviewer,135,A001901,inderjit s. dhillon,T16
+reviewer,136,A001913,ira cohen,T16
+reviewer,137,A001921,irina rish,T131
+reviewer,138,A001939,j. andrew bagnell,T131
+reviewer,139,A001966,jaideep srivastava,T16
+reviewer,140,A001972,james a. hendler,T144
+reviewer,141,A001978,james c. french,T24
+reviewer,142,A001980,james clifford,T16
+reviewer,143,A001981,james cussens,T131
+reviewer,144,A001990,james g. shanahan,T145
+reviewer,145,A002087,jeffrey xu yu,T16
+reviewer,146,A002090,jennifer g. dy,T16
+reviewer,147,A002091,jennifer golbeck,T144
+reviewer,148,A002100,jeremy j. carroll,T144
+reviewer,149,A002110,jerome simeon,T144
+reviewer,150,A002131,jian pei,T16
+reviewer,151,A002144,jianping zhang,T16
+reviewer,152,A002145,jianwen su,T107
+reviewer,153,A002148,jiawei han,T16
+reviewer,154,A002153,jieping ye,T16
+reviewer,155,A002203,joao gama,T16
+reviewer,156,A002225,johannes furnkranz,T16
+reviewer,157,A002226,johannes gehrke,T16
+reviewer,158,A002267,john mylopoulos,T145
+reviewer,159,A002290,jonathan j. oliver,T131
+reviewer,160,A002302,jorg sander,T16
+reviewer,161,A002306,jorge cardoso,T107
+reviewer,162,A002337,joshua alspector,T162
+reviewer,163,A002345,joydeep ghosh,T16
+reviewer,164,A002362,juliana freire,T144
+reviewer,165,A002373,jun-ichi takeuchi,T16
+reviewer,166,A002376,junghoo cho,T144
+reviewer,167,A002393,jussi myllymaki,T144
+reviewer,168,A002397,justin zobel,T24
+reviewer,169,A002413,kai ming ting,T16
+reviewer,170,A002414,kai yu,T131
+reviewer,171,A002458,kazumi saito,T16
+reviewer,172,A002479,kenji yamanishi,T16
+reviewer,173,A002491,kent a. spackman,T145
+reviewer,174,A002501,kevin p. murphy,T131
+reviewer,175,A002543,kotagiri ramamohanarao,T16
+reviewer,176,A002551,kristin p. bennett,T16
+reviewer,177,A002585,kyuseok shim,T16
+reviewer,178,A002625,lee a. hollaar,T24
+reviewer,179,A002626,lee-feng chien,T16
+reviewer,180,A002658,li ding,T144
+reviewer,181,A002660,li ma,T144
+reviewer,182,A002670,liangzhao zeng,T107
+reviewer,183,A002692,lipyeow lim,T107
+reviewer,184,A002701,liviu badea,T145
+reviewer,185,A002707,ljupco todorovski,T16
+reviewer,186,A002731,luc de raedt,T16
+reviewer,187,A002742,luis e. ortiz,T131
+reviewer,188,A002751,luis torgo,T16
+reviewer,189,A002771,m. omair shafiq,T107
+reviewer,190,A002809,manfred jaeger,T131
+reviewer,191,A002810,manfred k. warmuth,T131
+reviewer,192,A002843,marco pistore,T107
+reviewer,193,A002861,margaret h. dunham,T16
+reviewer,194,A002955,martin ester,T16
+reviewer,195,A003001,massimo paolucci,T107
+reviewer,196,A003024,matthew richardson,T144
+reviewer,197,A003043,maurice van keulen,T131
+reviewer,198,A003046,maurizio lenzerini,T145
+reviewer,199,A003053,max welling,T131
+reviewer,200,A003062,mehran sahami,T16
+reviewer,201,A003067,melanie hilario,T16
+reviewer,202,A003084,michael collins,T131
+reviewer,203,A003106,michael i. jordan,T131
+reviewer,204,A003109,michael j. kearns,T131
+reviewer,205,A003130,michael r. berthold,T131
+reviewer,206,A003133,michael rabinovich,T144
+reviewer,207,A003191,mike p. papazoglou,T107
+reviewer,208,A003195,mikhail bilenko,T145
+reviewer,209,A003202,milos hauskrecht,T131
+reviewer,210,A003207,min-yen kan,T144
+reviewer,211,A003212,ming-syan chen,T16
+reviewer,212,A003219,miroslav kubat,T16
+reviewer,213,A003279,nada lavrac,T16
+reviewer,214,A003294,nando de freitas,T131
+reviewer,215,A003304,natasa milic-frayling,T144
+reviewer,216,A003308,nathalie japkowicz,T16
+reviewer,217,A003312,nathan srebro,T131
+reviewer,218,A003322,nenad stojanovic,T144
+reviewer,219,A003329,nicholas kushmerick,T144
+reviewer,220,A003333,nick craswell,T144
+reviewer,221,A003370,ning zhong,T144
+reviewer,222,A003371,nir friedman,T131
+reviewer,223,A003375,nitesh v. chawla,T16
+reviewer,224,A003377,nivio ziviani,T144
+reviewer,225,A003411,olfa nasraoui,T144
+reviewer,226,A003439,opher etzion,T145
+reviewer,227,A003464,padhraic smyth,T16
+reviewer,228,A003485,paolo merialdo,T144
+reviewer,229,A003548,paul r. cohen,T131
+reviewer,230,A003556,paul w. p. j. grefen,T107
+reviewer,231,A003558,paul-alexandru chirita,T144
+reviewer,232,A003567,pavel brazdil,T16
+reviewer,233,A003574,pavel zezula,T24
+reviewer,234,A003582,peer kroger,T16
+reviewer,235,A003602,peter clark,T145
+reviewer,236,A003613,peter grunwald,T131
+reviewer,237,A003665,philip s. yu,T16
+reviewer,238,A003684,piero fraternali,T144
+reviewer,239,A003758,rajeev rastogi,T16
+reviewer,240,A003767,ralf rantzau,T16
+reviewer,241,A003775,ramakrishnan srikant,T144
+reviewer,242,A003785,ramon lopez de mantaras,T131
+reviewer,243,A003806,rayid ghani,T16
+reviewer,244,A003821,remco r. bouckaert,T131
+reviewer,245,A003834,ricardo a. baeza-yates,T144
+reviewer,246,A003836,ricardo bezerra de andrade e silva,T16
+reviewer,247,A003843,rich caruana,T131
+reviewer,248,A003852,richard hull,T107
+reviewer,249,A003860,richard m. tong,T131
+reviewer,250,A003861,richard nock,T16
+reviewer,251,A003929,roberto j. bayardo jr.,T144
+reviewer,252,A003945,roger s. barga,T145
+reviewer,253,A003959,ron kohavi,T16
+reviewer,254,A003969,ronald parr,T131
+reviewer,255,A003979,ronny lempel,T144
+reviewer,256,A003988,ross d. king,T16
+reviewer,257,A004011,ruoming jin,T16
+reviewer,258,A004020,s. k. michael wong,T131
+reviewer,259,A004027,saharon rosset,T16
+reviewer,260,A004070,sanjay modgil,T131
+reviewer,261,A004083,sarabjot s. anand,T144
+reviewer,262,A004087,saso dzeroski,T16
+reviewer,263,A004089,satinder p. singh,T131
+reviewer,264,A004097,savitha srinivasan,T144
+reviewer,265,A004116,sebastian michel,T24
+reviewer,266,A004176,shenghua bao,T145
+reviewer,267,A004197,shlomo argamon,T16
+reviewer,268,A004199,shlomo geva,T16
+reviewer,269,A004211,shumeet baluja,T131
+reviewer,270,A004225,sihem amer-yahia,T144
+reviewer,271,A004276,spiros papadimitriou,T16
+reviewer,272,A004277,sreangsu acharyya,T144
+reviewer,273,A004305,stefan kramer,T16
+reviewer,274,A004317,stefan wrobel,T16
+reviewer,275,A004323,stefano monti,T131
+reviewer,276,A004324,stefano paraboschi,T144
+reviewer,277,A004330,steffen staab,T144
+reviewer,278,A004361,steve lawrence,T144
+reviewer,279,A004378,stratos idreos,T145
+reviewer,280,A004402,sunita sarawagi,T16
+reviewer,281,A004415,susie stephens,T145
+reviewer,282,A004416,suvrit sra,T16
+reviewer,283,A004438,tak-lam wong,T144
+reviewer,284,A004440,takahira yamaguchi,T145
+reviewer,285,A004463,tao tao,T16
+reviewer,286,A004468,tapio elomaa,T16
+reviewer,287,A004475,terence critchlow,T16
+reviewer,288,A004478,terran lane,T16
+reviewer,289,A004514,thomas l. griffiths,T131
+reviewer,290,A004515,thomas lukasiewicz,T131
+reviewer,291,A004539,thorsten joachims,T16
+reviewer,292,A004548,tim oates,T16
+reviewer,293,A004566,tobias scheffer,T16
+reviewer,294,A004578,tom m. mitchell,T16
+reviewer,295,A004582,tomas vitvar,T107
+reviewer,296,A004588,tommi jaakkola,T131
+reviewer,297,A004595,tony jebara,T131
+reviewer,298,A004621,udo kruschwitz,T145
+reviewer,299,A004625,ulf brefeld,T16
+reviewer,300,A004629,ulrich kuster,T107
+paper,1,T107_0,Automatic Deployment of Application-Specific Metadata and Code in MOCHA,T107
+paper,2,T107_1,MOCHA: A Self-Extensible Database Middleware System for Distributed Data Sources,T107
+paper,3,T107_10,Evaluation of Correctness Criteria for Dynamic Workflow Changes,T107
+paper,4,T107_100,Reusing Analogous Components,T107
+paper,5,T107_101,A Formal Approach to Reusing More General Components,T107
+paper,6,T107_102,Using Formal Methods to Construct a Software Component Library,T107
+paper,7,T107_103,"Unraveling the Web Services Web: An Introduction to SOAP, WSDL, and UDDI",T107
+paper,8,T107_104,Mining Social Networks: Uncovering Interaction Patterns in Business Processes,T107
+paper,9,T107_105,Discovering Social Networks from Event Logs,T107
+paper,10,T107_106,Knowledge-Based Schema Analysis in a Multi-Database,T107
+paper,11,T107_107,A Unified Framework for Supporting Dynamic Schema Evolution in Object Databases,T107
+paper,12,T107_108,Dealing with Version Pertinence to Design an Efficient Schema Evolution Framework,T107
+paper,13,T107_109,Roles: A Methodology for Representing Multifaceted Objects,T107
+paper,14,T107_11,Using the pi-Calculus for Formalizing Workflow Patterns,T107
+paper,15,T107_110,Concurrency Control and Recovery in Transactional Process Management,T107
+paper,16,T107_12,Combining Theory and Practice in Integrity Control: A Declarative Approach to the Specification of a Transaction Modification Subsystem,T107
+paper,17,T107_13,Parallel Handling of Integrity Constraints on Fragmented Relations,T107
+paper,18,T107_14,A Simple Analysis of the LRU Buffer Policy and Its Relationship to Buffer Warm-Up Transient,T107
+paper,19,T107_15,Analytical Modeling of a Hierarchical Buffer for a Data Sharing Environment,T107
+paper,20,T107_16,The Design and Implementation of K: A High-Level Knowledge-Base Programming Language of OSAM*.KBMS,T107
+paper,21,T107_17,An Extensible Kernel Object Management System,T107
+paper,22,T107_18,Dispatching Multiple Mobile Agents in Parallel for Visiting E-Shops,T107
+paper,23,T107_19,Several Structures for Protecting the Routes of Mobile Agents Dispatched in Parallel,T107
+paper,24,T107_2,A Scalable Architecture for Autonomous Heterogeneous Database Interactions,T107
+paper,25,T107_20,The Application of Petri Nets to Workflow Management,T107
+paper,26,T107_21,Processes Driving the Networked Economy,T107
+paper,27,T107_22,Algorithms for Asynchronous Parallel Processing of Object-Oriented Databases,T107
+paper,28,T107_23,An Object Flow Computer for Database Applications: Design and Performance Evaluation,T107
+paper,29,T107_24,Association Algebra: A Mathematical Foundation for Object-Oriented Databases,T107
+paper,30,T107_25,OSAM*KBMS: An Object-Oriented Knowledge Base Management System for Supporting Advanced Applications,T107
+paper,31,T107_26,Service Interaction Patterns,T107
+paper,32,T107_27,Formalizing Service Interactions,T107
+paper,33,T107_28,Business Process Management: A Survey,T107
+paper,34,T107_29,"IEEE Internet Computing: Spotlight - Unraveling the Web Services Web: An Introduction to SOAP, WSDL, and UDDI",T107
+paper,35,T107_3,Large Multidatabases: Beyond Federation and Global Schema Integration,T107
+paper,36,T107_30,Conceptual Model of Web Service Reputation,T107
+paper,37,T107_31,Using Interval Timed Coloured Petri Nets to Calculate Performance Bounds,T107
+paper,38,T107_32,Interval Timed Coloured Petri Nets and their Analysis,T107
+paper,39,T107_33,Effect of System Dynamics on Coupling Architectures for Transaction Processing,T107
+paper,40,T107_34,An Approximate Analysis of the LRU and FIFO Buffer Replacement Schemes,T107
+paper,41,T107_35,Building Internet Marketplaces on the Basis of Mobile Agents for Parallel Processing,T107
+paper,42,T107_36,Verification of Forbidden Behavior in EPCs,T107
+paper,43,T107_37,Model-Driven Trust Negotiation for Web Services,T107
+paper,44,T107_38,Ontological Approach for Information Discovery in Internet Databases,T107
+paper,45,T107_39,Performance Analysis of Affinity Clustering on Transaction Processing Coupling Architecture,T107
+paper,46,T107_4,The Web Service Modeling Framework WSMF,T107
+paper,47,T107_40,Performance Analysis of Coherency Control Policies through Lock Retention,T107
+paper,48,T107_41,An optimal pinwheel scheduler using the single-number reduction technique,T107
+paper,49,T107_42,The design and implementation of real-time schedulers in RED-linux,T107
+paper,50,T107_43,On Dealing with Structural Conflicts between Process Type and Instance Changes,T107
+paper,51,T107_44,Building A Robust Workflow Management System With Persistent Queues and Stored Procedures,T107
+paper,52,T107_45,Transaktionsunterstutzung fur Workflows,T107
+paper,53,T107_46,Database Access Characterization for Buffer Hit Prediction,T107
+paper,54,T107_47,Generating a Process Model from a Process Audit Log,T107
+paper,55,T107_48,Process Mining: Discovering Direct Successors in Process Logs,T107
+paper,56,T107_49,Buffer Analysis for a Data Sharing Environment with Skewed Data Access,T107
+paper,57,T107_5,A Conceptual Architecture for Semantic Web Enabled Web Services,T107
+paper,58,T107_50,The Distributed Interoperable Object Model and Its Application to Large-scale Interoperable Database Systems,T107
+paper,59,T107_51,Guest Editors' Introduction to the Special Issue on Heterogeneous Databases,T107
+paper,60,T107_52,Characterization of Database Access Pattern for Analytic Prediction of Buffer Hit Probability,T107
+paper,61,T107_53,Performance Modelling and Comparisons of Global Shared Buffer Management Policies in a Cluster Environment,T107
+paper,62,T107_54,Web Service Composition Languages: Old Wine in New Bottles?,T107
+paper,63,T107_55,Workflow Verification: Finding Control-Flow Errors Using Petri-Net-Based Techniques,T107
+paper,64,T107_56,Modeling Business Collaborations in Context,T107
+paper,65,T107_57,**DIR**-XML2 - Unambiguous access to XML-based business documents in B2B e-commerce,T107
+paper,66,T107_58,An Association Algebra For Processing Object-Oriented Databases,T107
+paper,67,T107_59,Analysis of the Generalized Clock Buffer Replacement Scheme for Database Transaction Processing,T107
+paper,68,T107_6,Facilitating the Rapid Development and Scalable Orchestration of Composite Web Services,T107
+paper,69,T107_60,A Configurable Approach for Object Sharing Among Multidatabase Systems,T107
+paper,70,T107_61,Determining Schema Interdependencies in Object-Oriented Multidatabase Systems,T107
+paper,71,T107_62,Performance Evaluation of Integrity Control in a Parallel Main-Memory Database System,T107
+paper,72,T107_63,Inter-operability of Workflow Applications: Local Criteria for Global Soundness,T107
+paper,73,T107_64,Challenges in Business Process Management: Verification of Business Processing Using Petri Nets,T107
+paper,74,T107_65,Flexible Composition of Enterprise Web Services,T107
+paper,75,T107_66,Automated Service Composition Using Heuristic Search,T107
+paper,76,T107_67,Characterization of Database Access Skew in a Transaction Processing Environment,T107
+paper,77,T107_68,Implementing a General Real-Time Scheduling Framework in the RED-Linux Real-Time Kernel,T107
+paper,78,T107_69,Building Flexible Real-Time Systems Using the Flex Language,T107
+paper,79,T107_7,The Self-Serv Environment for Web Services Composition,T107
+paper,80,T107_70,Algebraic Change Propagation for Semijoin and Outerjoin Queries,T107
+paper,81,T107_71,A Framework for Supporting Data Integration Using the Materialized and Virtual Approaches,T107
+paper,82,T107_72,Object-Oriented Design of a Flexible Workflow Management System,T107
+paper,83,T107_73,ADEPTflex-Supporting Dynamic Changes of Workflows Without Losing Control,T107
+paper,84,T107_74,Mining Workflow Recovery from Event Based Logs,T107
+paper,85,T107_75,Algorithms for Materialized View Design in Data Warehousing Environment,T107
+paper,86,T107_76,A Framework for Designing Materialized Views in Data Warehousing Environment,T107
+paper,87,T107_77,Managing Business Processes an an Information Resource,T107
+paper,88,T107_78,An Online Video Placement Policy based on Bandwith to Space Ratio (BSR),T107
+paper,89,T107_79,Issues in the Design of Multi-Server File Systems to Cope with Load Skew,T107
+paper,90,T107_8,Query Reformulation Using Materialized Views in Data Warehousing Environment,T107
+paper,91,T107_80,Supporting Business Transactions Via Partial Backward Recovery In Workflow Management Systems,T107
+paper,92,T107_81,An Extensible Knowledge Base Management System for Supporting Rule-based Interoperability among Heterogeneous Systems,T107
+paper,93,T107_82,NCL: A Common Language for Achieving Rule-Based Interoperability Among Heterogeneous Systems,T107
+paper,94,T107_83,Evaluation of Generic Process Design Patterns: An Experimental Study,T107
+paper,95,T107_84,Service Agents and Virtual Enterprises: A Survey,T107
+paper,96,T107_85,Transforming UMM Business Collaboration Models to BPEL,T107
+paper,97,T107_86,From Inter-organizational Workflows to Process Execution: Generating BPEL from WS-CDL,T107
+paper,98,T107_87,Integrity Control in Relational Database Systems - An Overview,T107
+paper,99,T107_88,The Effect of Skewed Data Access on Buffer Hits and Data Contention an a Data Sharing Environment,T107
+paper,100,T107_89,Integrating Priority with Share in the Priority-Based Weighted Fair Queuing Scheduler for Real-Time Networks,T107
+paper,101,T107_9,An Extended Query Reformulation Technique Using Materialized Views,T107
+paper,102,T107_90,Mining Process Models from Workflow Logs,T107
+paper,103,T107_91,Updates and Application Migration Support in an ODMG Temporal Extension,T107
+paper,104,T107_92,Handling Temporal Grouping and Pattern-Matching Queries in a Temporal Object Model,T107
+paper,105,T107_93,Tackling the Challenges of Materialized View Design in Data Warehousing Environment,T107
+paper,106,T107_94,CapBasED-AMS: A Capability-based and Event-driven Activity Management System,T107
+paper,107,T107_95,CapBasED-AMS - A Framework for Capability-Based and Event-Driven Activity Management System,T107
+paper,108,T107_96,Materialized View Evolution Support in Data Warehouse Environment,T107
+paper,109,T107_97,Flexible Support of Team Processes by Adaptive Workflow Systems,T107
+paper,110,T107_98,A Rule-based Language for Deductive Object-Oriented Databases,T107
+paper,111,T107_99,Recovery Analysis of Data Sharing Systems under Deferred Dirty Page Propagation Policies,T107
+paper,112,T131_0,Current Approaches to Handling Imperfect Information in Data and Knowledge Bases,T131
+paper,113,T131_1,Towards Possibilistic Logic Programming,T131
+paper,114,T131_10,Application of the Evolutionary Algorithms for Classifier Selection in Multiple Classifier Systems with Majority Voting,T131
+paper,115,T131_11,New Measure of Classifier Dependency in Multiple Classifier Systems,T131
+paper,116,T131_12,Combinatorial auctions for supply chain formation,T131
+paper,117,T131_13,"AkBA: a progressive, anonymous-price combinatorial auction",T131
+paper,118,T131_14,An Open-Frame Theory of Incomplete Interval Probabilities,T131
+paper,119,T131_15,Bodies of Evidence Versus Simple Interval Probabilities,T131
+paper,120,T131_16,Alternative Representations of Discrete Fuzzy Measures for Decision Making,T131
+paper,121,T131_17,How to Improve Acts: An Alternative Representation of the Importance of Criteria in MCDM,T131
+paper,122,T131_18,A Guide to the Literature on Learning Probabilistic Networks from Data,T131
+paper,123,T131_19,A Theory of Inferred Causation,T131
+paper,124,T131_2,A local handling of inconsistent knowledge and default bases,T131
+paper,125,T131_20,Ant Colony Optimization and Stochastic Gradient Descent,T131
+paper,126,T131_21,Updating ACO Pheromones Using Stochastic Gradient Ascent and Cross-Entropy Methods,T131
+paper,127,T131_22,Conjectural Equilibrium in Multiagent Learning,T131
+paper,128,T131_23,Probabilities for a probabilistic network: a case study in oesophageal cancer,T131
+paper,129,T131_24,Bayesian networks in biomedicine and health-care,T131
+paper,130,T131_25,Taxonomic and Uncertain Integrity Constraints in Object-Oriented Databases - the TOP Approach,T131
+paper,131,T131_26,Uncertain Reasoning in Concept Lattices,T131
+paper,132,T131_27,Clustering interval-valued proximity data using belief functions,T131
+paper,133,T131_28,Multidimensional scaling of interval-valued dissimilarity data,T131
+paper,134,T131_29,An Alternative Approach to Computing with Words,T131
+paper,135,T131_3,A review of uncertainty handling formalisms,T131
+paper,136,T131_30,The Application of Generalised Fuzzy Rules to Machine Learning and Automated Knowledge Discovery,T131
+paper,137,T131_31,Constructor: A System for the Induction of Probabilistic Models,T131
+paper,138,T131_32,Operations for Learning with Graphical Models,T131
+paper,139,T131_33,A Bayesian Method for Learning Belief Networks that Contain Hidden Variables,T131
+paper,140,T131_34,Feature subset selection by genetic algorithms and estimation of distribution algorithms - A case study in the survival of cirrhotic patients treated with TIPS,T131
+paper,141,T131_35,An evaluation of machine-learning methods for predicting pneumonia mortality,T131
+paper,142,T131_36,Forecasting market demand for new telecommunications services: an introduction,T131
+paper,143,T131_37,"Automated Reasoning Using Possibilistic Logic: Semantics, Belief Revision, and Variable Certainty Weights",T131
+paper,144,T131_38,Epistemic Entrenchment and Possibilistic Logic,T131
+paper,145,T131_39,"Prioritised fuzzy constraint satisfaction problems: axioms, instantiation and validation",T131
+paper,146,T131_4,A Bayesian Method for the Induction of Probabilistic Networks from Data,T131
+paper,147,T131_40,A fuzzy constraint satisfaction problem in the wine industry,T131
+paper,148,T131_41,Filter versus wrapper gene selection approaches in DNA microarray domains,T131
+paper,149,T131_42,A collaborative intelligent tutoring system for medical problem-based learning,T131
+paper,150,T131_43,Modeling Individual and Collaborative Problem Solving in Medical Problem-Based Learning,T131
+paper,151,T131_44,Background to and perspectives on possibilistic graphical models,T131
+paper,152,T131_45,Decision Analysis and Expert Systems,T131
+paper,153,T131_46,Optimal Structure Identification With Greedy Search,T131
+paper,154,T131_47,A Hybrid Approach for Modeling Uncertainty in Terminological Logics,T131
+paper,155,T131_48,Betting boolean-style: a framework for trading in securities based on logical formulas,T131
+paper,156,T131_49,"A dynamic pari-mutuel market for hedging, wagering, and information aggregation",T131
+paper,157,T131_5,A Probabilistic Object-Oriented Data Model,T131
+paper,158,T131_50,Combining Configurational and Statistical Approaches in Image Retrieval,T131
+paper,159,T131_51,An Approach to Using XML and a Rule-Based Content Language with an Agent Communication Language,T131
+paper,160,T131_52,Representing e-commerce rules via situated courteous logic programs in RuleML,T131
+paper,161,T131_53,Model-based diagnosis: A probabilistic extension,T131
+paper,162,T131_54,Autonomous Bidding Agents in the Trading Agent Competition,T131
+paper,163,T131_55,Bid determination in simultaneous actions an agent architecture,T131
+paper,164,T131_56,Classifier selection for majority voting,T131
+paper,165,T131_57,"A Hybrid Model for Sharing Information Between Fuzzy, Uncertain and Default Reasoning Models in Multi-agent Systems",T131
+paper,166,T131_58,LSLNCF: A Hybrid Uncertain Reasoning Model Based on Probability,T131
+paper,167,T131_59,The Computational Complexity of Probabilistic Inference Using Bayesian Belief Networks,T131
+paper,168,T131_6,Learning Equivalence Classes of Bayesian-Network Structures,T131
+paper,169,T131_60,An ordinal approach to the processing of fuzzy queries with flexible quantifiers,T131
+paper,170,T131_61,Representing Default Rules in Possibilistic Logic,T131
+paper,171,T131_62,Uncertainty measures associated with fuzzy rules for connection admission control in ATM Networks,T131
+paper,172,T131_63,An improved Bayesian structural EM algorithm for learning Bayesian networks for clustering,T131
+paper,173,T131_64,Learning Bayesian networks for clustering by means of constructive induction,T131
+paper,174,T131_65,Using Probabilistic Information in Data Integration,T131
+paper,175,T131_66,P-CLASSIC: A Tractable Probablistic Description Logic,T131
+paper,176,T131_67,Value-Added Databases: Knowledge Discovery and Evidential Reasoning (Invited Paper),T131
+paper,177,T131_68,Database Mining in the Architecture of a Semantic Preprocessor for State Aware Query Optimization,T131
+paper,178,T131_69,Nash Q-Learning for General-Sum Stochastic Games,T131
+paper,179,T131_7,Unsupervised Learning Of Bayesian Networks Via Estimation Of Distribution Algorithms: An Application To Gene Expression Data Clustering,T131
+paper,180,T131_70,Classifiers: A Theoretical and Empirical Study,T131
+paper,181,T131_71,Arguing about beliefs and actions,T131
+paper,182,T131_72,Using Bayesian networks in the construction of a bi-level multi-classifier. A case study using intensive care unit patients data,T131
+paper,183,T131_73,Bayesian network multi-classifiers for protein secondary structure prediction,T131
+paper,184,T131_74,Graphical Models for Discivering Knowledge,T131
+paper,185,T131_75,Accelerated Quantification of Bayesian Networks with Incomplete Data,T131
+paper,186,T131_76,Resample and combine: an approach to improving uncertainty representation in evidential pattern classification,T131
+paper,187,T131_77,Presentation and description of two classification methods using data fusion based on sensor management,T131
+paper,188,T131_78,Bayesian Networks for Knowledge Discovery,T131
+paper,189,T131_79,"Possibilistic Logic, Preferential Models, Non-monotonicity and Related Issues",T131
+paper,190,T131_8,Normalizing Possibility Distributions Using t-Norms,T131
+paper,191,T131_80,On the Use of the Dempster Shafer Model in Information Indexing and Retrieval Applications,T131
+paper,192,T131_81,A declarative approach to business rules in contracts: courteous logic programs in XML,T131
+paper,193,T131_82,An Empirical Performance Study of the Ingres Search Accelerator for a Large Property Management Database System,T131
+paper,194,T131_83,A Hybrid Framework for Representing Uncertain Knowledge,T131
+paper,195,T131_84,Probabilistic Horn Abduction and Bayesian Networks,T131
+paper,196,T131_85,Addendum to 'Current Approaches to Handling Imperfect Information in Data and Knowledge Bases,T131
+paper,197,T131_9,Possibilistic Normalisation and Reasoning Under Partial Inconsistency,T131
+paper,198,T144_0,An Evolutionary Approach to Mining Robust Multi-Resolution Web Profiles and Context Sensitive URL Associations,T144
+paper,199,T144_1,Extracting Web User Profiles Using Relational Competitive Fuzzy Clustering,T144
+paper,200,T144_10,Web Usage Mining: Discovery and Applications of Usage Patterns from Web Data,T144
+paper,201,T144_100,The Connectivity Server: Fast Access to Linkage Information on the Web,T144
+paper,202,T144_101,Systematic Hypermedia Application Design with OOHDM,T144
+paper,203,T144_102,Implementing Interior Point Linear Programming Methods in the Optimization Subroutine Library,T144
+paper,204,T144_103,Implementing the Simplex Method for the Optimization Subroutine Library,T144
+paper,205,T144_104,A Tiered System for Serving Differentiated Content,T144
+paper,206,T144_105,System Design Issues for Internet Middleware Services: Deductions from a Large Client Trace,T144
+paper,207,T144_106,Mining Quantitative Association Rules in Large Relational Tables,T144
+paper,208,T144_107,An Object Oriented Approach to Web-Based Applications Design,T144
+paper,209,T144_108,Improvement of Precision and Recall for Information Retrieval in a Narrow Domain: Reuse of Concepts by Formal Concept Analysis,T144
+paper,210,T144_109,Context and Page Analysis for Improved Web Search,T144
+paper,211,T144_11,An Average Linear Time Algorithm For Web Usage Mining,T144
+paper,212,T144_110,Computing the Entropy of User Navigation in the Web,T144
+paper,213,T144_111,A Logic Framework for a Semantics of Object-Oriented Data Modeling,T144
+paper,214,T144_112,The OO-Binary Relationship Model: A Truly Object Oriented Conceptual Model,T144
+paper,215,T144_113,Addendum to 'Automatic Generation of Production Rules for Integrity Maintenance,T144
+paper,216,T144_114,Automatic Resource Compilation by Analyzing Hyperlink Structure and Associated Text,T144
+paper,217,T144_115,Efficient Crawling Through URL Ordering,T144
+paper,218,T144_116,The Intelligent Electronic Shopping System Based on Bayesian Customer Modeling,T144
+paper,219,T144_117,An Interactive Classification of Web Documents by Self-Organizing Maps and Search Engines,T144
+paper,220,T144_118,A SOM-Based Information Organizer for Text and Video Data,T144
+paper,221,T144_119,Automatic Rule Generation for Constraint Enforcement in Active Databases,T144
+paper,222,T144_12,Mining the Web for Acronyms Using the Duality of Patterns and Relations,T144
+paper,223,T144_120,A Fomalization of the Binary Object-Role Model based on Logic,T144
+paper,224,T144_121,Constructing Deterministic Finite-State Automata in Recurrent Neural Networks,T144
+paper,225,T144_122,An Empirical Performance Study of the Ingres Search Accelerator for a Large Property Management Database System,T144
+paper,226,T144_123,Database Mining in the Architecture of a Semantic Preprocessor for State Aware Query Optimization,T144
+paper,227,T144_124,Optimising Web Queries Using Document Type Definitions,T144
+paper,228,T144_125,XML-GL: A Graphical Language for Querying and Restructuring XML Documents,T144
+paper,229,T144_126,WSDM: A User Centered Design Method for Web Sites,T144
+paper,230,T144_127,The Object-Oriented Hypermedia Design Model,T144
+paper,231,T144_128,A Unified Framework for Supporting Dynamic Schema Evolution in Object Databases,T144
+paper,232,T144_129,Dealing with Version Pertinence to Design an Efficient Schema Evolution Framework,T144
+paper,233,T144_13,Trawling the Web for Emerging Cyber-Communities,T144
+paper,234,T144_130,XML: Current Developments and Future Challenges for the Database Community,T144
+paper,235,T144_131,"On Modularity for Conceptual Data Models and the Consequences for Subtyping, Inheritance  Overriding",T144
+paper,236,T144_132,Feed-Forward Neural Networks and Topographic Mappings for Exploratory Data Analysis,T144
+paper,237,T144_133,Shadow targets: A novel algorithm for topographic projections by radial basis functions,T144
+paper,238,T144_134,View Integration of Object Life-Cycles in Object-Oriented Design,T144
+paper,239,T144_135,Observation Consistent Integration of Views of Object Life-Cycles,T144
+paper,240,T144_136,"The Web as a Graph: Measurements, Models, and Methods",T144
+paper,241,T144_137,Design Reuse in Hypermedia Applications Development,T144
+paper,242,T144_138,Web Content Delivery to Heterogeneous Mobile Platforms,T144
+paper,243,T144_139,WebComposition: An Object-Oriented Support System for the Web Engineering Lifecycle,T144
+paper,244,T144_14,Asynchronous Version Advancement in a Distributed Three-Version Database,T144
+paper,245,T144_15,Scalable Versioning in Distributed Databases with Commuting Updates,T144
+paper,246,T144_16,Web-based Support Systems (WSS): A Report of the WIC Canada Research Centre,T144
+paper,247,T144_17,A Web-Based Intelligent Tutoring System for Computer Programming,T144
+paper,248,T144_18,Performance Evaluation of a Hybrid Run-Time Management Policy for Data Intensive Web Sites,T144
+paper,249,T144_19,Improving Web Server Performance by Caching Dynamic Data,T144
+paper,250,T144_2,Semantics for Null Extended Nested Relations,T144
+paper,251,T144_20,A Road Map to More Effective Web Personalization: Integrating Domain Knowledge with Web Usage Mining,T144
+paper,252,T144_21,Mining Sequential Patterns: Generalizations and Performance Improvements,T144
+paper,253,T144_22,Fast Algorithms for Mining Association Rules in Large Databases,T144
+paper,254,T144_23,"Scalable Feature Selection, Classification and Signature Generation for Organizing Large Text Databases into Hierarchical Topic Taxonomies",T144
+paper,255,T144_24,Feature Subset Selection in Text-Learning,T144
+paper,256,T144_25,Issues in Web Content Replication,T144
+paper,257,T144_26,Scalable Update Propagation in Epidemic Replicated Databases,T144
+paper,258,T144_27,Dynamic Load Balancing on Web-Server Systems,T144
+paper,259,T144_28,DNS Dispatching Algorithms with State Estimators for Scalable Web-Server Clusters,T144
+paper,260,T144_29,Designing Well-Structured Websites: Lessons to Be Learned from Database Schema Methodology,T144
+paper,261,T144_3,A Fully Precise Null Extended Nested Relational Algebra,T144
+paper,262,T144_30,HDM - A Model-Based Approach to Hypertext Application Design,T144
+paper,263,T144_31,How to build a WebFountain: An architecture for very large-scale text analytics,T144
+paper,264,T144_32,The WebCAT Framework - Automatic Generation of Meta-Data for Web Resources,T144
+paper,265,T144_33,"Mirror, Mirror on the Web: A Study of Host Pairs with Replicated Content",T144
+paper,266,T144_34,Self-Organization and Identification of Web Communities,T144
+paper,267,T144_35,A Structured Approach for the Definition of the Semantics of Active Databases,T144
+paper,268,T144_36,Automatic Generation of Production Rules for Integrity Maintenance,T144
+paper,269,T144_37,Predictive Algorithms for Browser Support of Habitual User Activities on the Web,T144
+paper,270,T144_38,Ordering and Selecting Production Rules for Constraint Maintenance: Complexity and Heuristic Solution,T144
+paper,271,T144_39,Building Light-Weight Wrappers for Legacy Web Data-Sources Using W4F,T144
+paper,272,T144_4,Discovery of Web Communities from Positive and Negative Examples,T144
+paper,273,T144_40,Web Ecology: Recycling HTML Pages as XML Documents Using W4F,T144
+paper,274,T144_41,Adaptive Web Sites: Automatically Synthesizing Web Pages,T144
+paper,275,T144_42,"Data-Driven, One-To-One Web Site Generation for Data-Intensive Applications",T144
+paper,276,T144_43,Design Principles for Data-Intensive Web Sites,T144
+paper,277,T144_44,Extracting Patterns and Relations from the World Wide Web,T144
+paper,278,T144_45,The SGF Metadata Framework and Its Support for Social Awareness on the World Wide Web,T144
+paper,279,T144_46,A Non-Obtrusive User Interface for Increasing Social Awareness on the World Wide Web,T144
+paper,280,T144_47,Random Sampling Techniques for Space Efficient Online Computation of Order Statistics of Large Datasets,T144
+paper,281,T144_48,Approximate Medians and other Quantiles in One Pass and with Limited Memory,T144
+paper,282,T144_49,Digital Libraries and Autonomous Citation Indexing,T144
+paper,283,T144_5,Machine Discovery Based on the Co-occurrence of References in a Search Engine,T144
+paper,284,T144_50,Web-Based Information Retrieval Support Systems: Building Research Tools for Scientists in the New Information Age,T144
+paper,285,T144_51,Constraint Enforcement Through Production Rules: Putting Active Databases at Work,T144
+paper,286,T144_52,Distributions of Surfers' Paths Through the World Wide Web: Empirical Characterizations,T144
+paper,287,T144_53,Using Markov Chains for Link Prediction in Adaptive Web Sites,T144
+paper,288,T144_54,Web Application Models Are More Than Conceptual Models,T144
+paper,289,T144_55,An Object-Oriented Model for Designing the Humam-Computer Interface Of Hypermedia Applications,T144
+paper,290,T144_56,Exploiting Webspace Organization for Accelerating Web Prefetching,T144
+paper,291,T144_57,Analysis and Characterization of Large-Scale Web Server Access Patterns and Performance,T144
+paper,292,T144_58,ACES: An efficient admission control scheme for QoS-aware web servers,T144
+paper,293,T144_59,Synchronizing a Database to Improve Freshness,T144
+paper,294,T144_6,Finding Replicated Web Collections,T144
+paper,295,T144_60,Focused Crawling: A New Approach to Topic-Specific Web Resource Discovery,T144
+paper,296,T144_61,Efficient Support for Partial Write Operations in Replicated Databases,T144
+paper,297,T144_62,Improving Fault Tolerance and Supporting Partial Writes in Structured Coterie Protocols for Replicated Objects,T144
+paper,298,T144_63,HPP: HTML Macro-Preprocessing to Support Dynamic Document Caching,T144
+paper,299,T144_64,Study of Piggyback Cache Validation for Proxy Caches in the World Wide Web,T144
+paper,300,T144_65,A Digital Photography Framework Enabling Affective Awareness in Home Communication,T144
