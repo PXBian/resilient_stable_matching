@@ -4,12 +4,12 @@ Generate individualized stable-marriage preference lists from a CSV.
 
 - X (taxis) prefer Y (passengers) according to total_amount (higher better).
 - Y (passengers) prefer X (taxis) according to tip_ratio = tip_amount / total_amount (higher better).
-- Each agent gets their *own* list by sampling from a Plackett–Luce-like model using the Gumbel trick.
+- Each agent gets their own list by sampling from a Plackett–Luce-like model using the Gumbel trick.
 - Deterministic with --seed. Always complete and tie-free.
 
 Output formats:
-  --output-format ids      (default) -> preferences over IDs (paper_id 'Txx:vid', reviewer_id 'A000001')
-  --output-format indices  -> preferences over indices 1..n, with mapping exported in JSON and optional CSV
+  --output-format ids (default) -> preferences over IDs (taxi_id 'x100', passenger_id 'y50')
+  --output-format indices       -> preferences over indices 1..n, with mapping exported in TAXI_idx_map.csv
 
 Optional CSV mapping (--out-map-csv) has rows for both papers and reviewers.
 
@@ -19,8 +19,8 @@ python3 gen_instance_TAXI.py \
     -n 100 \
     --sample-rows \
     --seed 42 \
-    --temp-x 0.1 \
-    --temp-y 0.1 \
+    --temp-x 0.1 \  # Adjust the randomness level of the preference list. 
+    --temp-y 0.1 \  # Lower values -> more deterministic rankings, higher values -> more diverse and random rankings
     --out-txt TAXI_100_instance.txt \
     --output-format indices \
     --out-map-csv TAXI_idx_map.csv
@@ -193,12 +193,12 @@ def main():
         x_to_idx = y_to_idx = idx_to_x = idx_to_y = None
 
     # Quick peek
-    def preview_ids(title, d, keys, k=3, m=10):
+    def preview_ids(title, d, keys, k=5, m=20):
         print(f"\n{title} (showing {k} lists; top {m} choices):")
         for a in keys[:k]:
             print(f"  {a}: {' '.join(d[a][:m])}")
 
-    def preview_indices(title, d, keys, k=3, m=10):
+    def preview_indices(title, d, keys, k=5, m=20):
         print(f"\n{title} (indices) (showing {k} lists; top {m} choices):")
         for a in keys[:k]:
             top = ' '.join(str(t) for t in d[a][:m])
