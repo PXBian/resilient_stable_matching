@@ -1,10 +1,7 @@
 #include <iostream>
 #include <lemon/list_graph.h>
 #include <lemon/maps.h>
-#include <lemon/capacity_scaling.h>
 #include <lemon/network_simplex.h>
-#include <lemon/cost_scaling.h>
-#include <lemon/cycle_canceling.h>
 #include <limits>
 #include <iomanip>
 #include <string>
@@ -71,8 +68,8 @@ int main(int argv, char** argc) {
         }
     }
 
-    // 配置 CapacityScaling 最小费用流
-    CapacityScaling<ListDigraph, int, int> mcf(graph);
+    // 配置 NetworkSimplex 最小费用流
+    NetworkSimplex<ListDigraph, int, int> mcf(graph);
     mcf.costMap(cost)
        .upperMap(capacity)
        .supplyMap(supply);
@@ -84,16 +81,16 @@ int main(int argv, char** argc) {
 
     cout << "The runtime is " << run_time << " s." << endl;
 
-    if (result == CapacityScaling<ListDigraph, int, int>::OPTIMAL) {
+    if (result == NetworkSimplex<ListDigraph, int, int>::OPTIMAL) {
         long long totalCost = mcf.totalCost();
         cout << "OK (LEMON CapacityScaling). "
              << "n = " << n
              << ", max_deg = " << max_deg
              << ", flow = " << flowAmount
              << ", total_cost = " << totalCost << "\n";
-    } else if (result == CapacityScaling<ListDigraph, int, int>::INFEASIBLE) {
+    } else if (result == NetworkSimplex<ListDigraph, int, int>::INFEASIBLE) {
         cout << "The problem is INFEASIBLE." << endl;
-    } else if (result == CapacityScaling<ListDigraph, int, int>::UNBOUNDED) {
+    } else if (result == NetworkSimplex<ListDigraph, int, int>::UNBOUNDED) {
         cout << "The problem is UNBOUNDED." << endl;
     }
 

@@ -26,7 +26,7 @@ bool dijkstraWithPotentials(vector<vector<Edge>> &G,
                             vector<int>& parent,
                             vector<int>& parent_edge) {
         
-    potential.assign(N, 0);
+    
     dist.assign(N, INF);
     parent.assign(N, -1);
     parent_edge.assign(N, -1);
@@ -75,7 +75,8 @@ pair<int, int> minCost(vector<vector<Edge>> &G, int s, int t, int max_flow) {
     int total_flow = 0;
     int total_cost = 0;
 
-    vector<int> potential, dist, parent, parent_edge;
+    vector<int> dist, parent, parent_edge;
+    vector<int> potential(N, 0);
 
     // int iteration = 0;
     while (total_flow < max_flow) {
@@ -159,6 +160,9 @@ int main(int argc, char** argv) {
             int cap = cap_dist(rng);
             int cost = cost_dist(rng);
             addEdge(G, u, v, cap, cost);
+            cap = INFINITY;
+            cost = 0;
+            addEdge(G, v, u, cap, cost);
         }
     }
 
@@ -170,6 +174,8 @@ int main(int argc, char** argv) {
 
     auto prog_end = chrono::high_resolution_clock::now();
     double run_time = chrono::duration<double>(prog_end - prog_start).count();
+
+    cout << "The runtime is " << run_time << " s." << endl;
 
     if (actual_flow < 0) {
         cout << "Error: Invalid flow computation (negative cycle detected)\n";
@@ -184,7 +190,6 @@ int main(int argc, char** argv) {
              << ", flow = " << flow_amount
              << ", min_cost = " << min_cost << "\n";
     }
-    cout << "The runtime is " << run_time << " s." << endl;
 
 
     return 0;
