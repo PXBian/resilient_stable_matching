@@ -189,7 +189,7 @@ int main(int argv, char** argc) {
             if (v >= n) break;
             ListDigraph::Arc b = graph.addArc(nodes[v], nodes[u]);
             cost[b] = 0;
-            capacity[b] = INT32_MAX;
+            capacity[b] = INF;
             arcLabel[b] = to_string(v) + "->" + to_string(u) + "#" + to_string(arcCounter);
             ListDigraph::Arc a = graph.addArc(nodes[u], nodes[v]);
             cost[a] = 1;
@@ -202,7 +202,7 @@ int main(int argv, char** argc) {
             int ssp_cap = cap;
             int ssp_cost = 1;
             addEdge(G, u, v, ssp_cap, ssp_cost);
-            ssp_cap = INT32_MAX;
+            ssp_cap = INF;
             ssp_cost = 0;
             addEdge(G, v, u, ssp_cap, ssp_cost);
         }
