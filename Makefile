@@ -15,13 +15,28 @@ RUST_LIB_NAME = rotations_poset
 # LEMON 库设置
 # 优先使用 pkg-config，如果不可用则使用默认路径
 LEMON_CFLAGS = $(shell pkg-config --cflags lemon 2>/dev/null || echo "-I/usr/local/include")
-LEMON_LDFLAGS = $(shell pkg-config --libs lemon 2>/dev/null || echo "-L/usr/local/lib -llemon")
+LEMON_LDFLAGS = $(shell pkg-config --libs lemon 2>/dev/null || echo "-L/usr/local/lib -lemon")
 
 # 如果 pkg-config 不可用，尝试使用本地构建的 LEMON
 ifeq ($(LEMON_CFLAGS),-I/usr/local/include)
+    # 优先检查安装后的 liblemon 目录（需要同时存在 include 和 lib 目录，且 lib 中有库文件）
     ifneq ($(wildcard lemon-1.3.1/build/liblemon/include),)
-        LEMON_CFLAGS = -Ilemon-1.3.1/build/liblemon/include
-        LEMON_LDFLAGS = -Llemon-1.3.1/build/liblemon/lib -llemon
+        ifneq ($(wildcard lemon-1.3.1/build/liblemon/lib/libemon.a)$(wildcard lemon-1.3.1/build/liblemon/lib/liblemon.so),)
+            LEMON_CFLAGS = -Ilemon-1.3.1/build/liblemon/include
+            LEMON_LDFLAGS = -Llemon-1.3.1/build/liblemon/lib -lemon
+        endif
+    endif
+    # 如果上面的检查失败，尝试使用 build 目录中的库（未安装的情况）
+    ifeq ($(LEMON_CFLAGS),-I/usr/local/include)
+        ifneq ($(wildcard lemon-1.3.1/build/lemon/libemon.a),)
+            # 检查头文件位置（可能在 build 目录或源码目录）
+            ifneq ($(wildcard lemon-1.3.1/build/lemon/list_graph.h),)
+                LEMON_CFLAGS = -Ilemon-1.3.1/build/lemon
+            else
+                LEMON_CFLAGS = -Ilemon-1.3.1
+            endif
+            LEMON_LDFLAGS = -Llemon-1.3.1/build/lemon -lemon
+        endif
     endif
 endif
 
