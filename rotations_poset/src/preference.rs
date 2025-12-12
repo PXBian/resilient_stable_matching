@@ -22,6 +22,9 @@ impl Preferences {
         let n = ranking.len();
         let mut position = vec![0; n];
         for (i, &p) in ranking.iter().enumerate() {
+            if p >= n {
+                panic!("index out of bounds: the len is {} but the index is {}", n, p);
+            }
             position[p] = i;
         }
         Self { ranking, position }

@@ -16,10 +16,6 @@ Output formats:
 
 Optional CSV mapping (--out-map-csv) has rows for both papers and reviewers.
 
-Output file:
-  ADM_200_instance.txt: 400 lines in total, first 200 lines are for X (intuition), last 200 lines are for Y (students).
-  Each line is a preference list (length 200) of the other side.
-
 Usage example:
   python3 gen_instance_ADM.py \
     --csv raw/ADM_Norway_raw.csv \
@@ -276,10 +272,10 @@ def main():
     # Build index mappings if requested
     use_indices = (args.output_format == "indices")
     if use_indices:
-        x_to_idx = {x: i+1 for i, x in enumerate(x_ids)}
-        y_to_idx = {y: j+1 for j, y in enumerate(y_ids)}
-        idx_to_x = {i+1: x for i, x in enumerate(x_ids)}
-        idx_to_y = {j+1: y for j, y in enumerate(y_ids)}
+        x_to_idx = {x: i for i, x in enumerate(x_ids)}
+        y_to_idx = {y: j for j, y in enumerate(y_ids)}
+        idx_to_x = {i: x for i, x in enumerate(x_ids)}
+        idx_to_y = {j: y for j, y in enumerate(y_ids)}
 
         # Convert prefs to indices
         x_prefs = {x_to_idx[x]: [y_to_idx[y] for y in x_prefs_ids[x]] for x in x_ids}
@@ -352,9 +348,9 @@ def main():
             w = csv.writer(f)
             if use_indices:
                 w.writerow(["side","index","id"])
-                for i, x in enumerate(x_ids, start=1):
+                for i, x in enumerate(x_ids):
                     w.writerow(["X", i, x])
-                for j, y in enumerate(y_ids, start=1):
+                for j, y in enumerate(y_ids):
                     w.writerow(["Y", j, y])
             else:
                 w.writerow(["side","id"])
@@ -366,3 +362,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
