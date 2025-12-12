@@ -16,6 +16,10 @@ Output formats:
 
 Optional CSV mapping (--out-map-csv) has rows for both papers and reviewers.
 
+Output file:
+  ADM_200_instance.txt: 400 lines in total, first 200 lines are for X (intuition), last 200 lines are for Y (students).
+  Each line is a preference list (length 200) of the other side.
+
 Usage example:
   python3 gen_instance_ADM.py \
     --csv raw/ADM_Norway_raw.csv \
@@ -24,8 +28,7 @@ Usage example:
     --temp-x 0.1 \
     --temp-y 0.1 \
     --out-txt  ADM_200_instance.txt \
-    --output-format indices \
-    --out-map-csv ADM_idx_map.csv
+    --output-format indices
 """
 
 import argparse
@@ -328,19 +331,19 @@ def main():
     if args.out_txt:
         with open(args.out_txt, "w") as f:
             if use_indices:
-                f.write("X side (intuition indices) preferences over Y (student indices):\n")
+                # f.write("X side (intuition indices) preferences over Y (student indices):\n")
                 for xi in sorted(x_prefs.keys()):
-                    f.write(f"{xi}: {' '.join(str(t) for t in x_prefs[xi])}\n")
-                f.write("\nY side (student indices) preferences over X (intuition indices):\n")
+                    f.write(f"{' '.join(str(t) for t in x_prefs[xi])}\n")
+                # f.write("\nY side (student indices) preferences over X (intuition indices):\n")
                 for yi in sorted(y_prefs.keys()):
-                    f.write(f"{yi}: {' '.join(str(t) for t in y_prefs[yi])}\n")
+                    f.write(f"{' '.join(str(t) for t in y_prefs[yi])}\n")
             else:
-                f.write("X side (intuition) preferences over Y (students):\n")
+                # f.write("X side (intuition) preferences over Y (students):\n")
                 for x in x_ids:
-                    f.write(f"{x}: {' '.join(x_prefs[x])}\n")
-                f.write("\nY side (students) preferences over X (intuition):\n")
+                    f.write(f"{' '.join(x_prefs[x])}\n")
+                # f.write("\nY side (students) preferences over X (intuition):\n")
                 for y in y_ids:
-                    f.write(f"{y}: {' '.join(y_prefs[y])}\n")
+                    f.write(f"{' '.join(y_prefs[y])}\n")
         print(f"Wrote TXT: {args.out_txt}")
 
     # Mapping CSV (optional)

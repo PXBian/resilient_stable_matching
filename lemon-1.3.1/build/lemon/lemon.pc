@@ -1,0 +1,10 @@
+prefix=/home/pengxinbian/Research/resilient_stable_matching/lemon-1.3.1/build/liblemon
+exec_prefix=/home/pengxinbian/Research/resilient_stable_matching/lemon-1.3.1/build/liblemon/bin
+libdir=/home/pengxinbian/Research/resilient_stable_matching/lemon-1.3.1/build/liblemon/lib
+includedir=/home/pengxinbian/Research/resilient_stable_matching/lemon-1.3.1/build/liblemon/include
+
+Name: LEMON
+Description: Library for Efficient Modeling and Optimization in Networks
+Version: 1.3.1
+Libs: -L${libdir} -lemon     
+Cflags: -I${includedir}

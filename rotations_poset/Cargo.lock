@@ -83,7 +83,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rotation_poset"
+name = "rotations_poset"
 version = "0.1.0"
 dependencies = [
  "rand",
