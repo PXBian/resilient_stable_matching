@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# 加载 Rust 环境（如果存在）
+if [ -f "$HOME/.cargo/env" ]; then
+    source "$HOME/.cargo/env"
+fi
+
 mkdir peak_ram
 gunzip data/*.gz
 

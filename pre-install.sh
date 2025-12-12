@@ -50,32 +50,48 @@ else
     echo "Rust/cargo already installed: $(cargo --version)"
 fi
 
-# 1. 解压源码
+# 1. 清理可能存在的旧构建产物（避免 CMake 路径不匹配错误）
+if [ -d "lemon-1.3.1" ]; then
+    echo "Cleaning up existing lemon-1.3.1 directory..."
+    rm -rf lemon-1.3.1
+fi
+
+# 2. 解压源码
+echo "Extracting lemon-1.3.1.tar.gz..."
 tar -xzf lemon-1.3.1.tar.gz
 cd lemon-1.3.1
 
-# 2. 建 build 目录
+# 3. 清理可能存在的旧 build 目录（避免 CMake 缓存路径冲突）
+if [ -d "build" ]; then
+    echo "Cleaning up existing build directory..."
+    rm -rf build
+fi
+
+# 4. 创建新的 build 目录
 mkdir -p build
 cd build
 
 # 注意：这里需要 cmake，可先在 HPC 上 module load cmake
-# 3. 配置安装前缀到当前 build 目录下的 liblemon
+# 5. 配置安装前缀到当前 build 目录下的 liblemon
+echo "Configuring LEMON with CMake..."
 cmake -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX="$(pwd)"/liblemon ..
 
-# 4. 编译和安装到 liblemon/
+# 6. 编译和安装到 liblemon/
+echo "Building LEMON..."
 make -j4
+echo "Installing LEMON..."
 make install
 
-# 5. 把 liblemon 挪到项目根目录，和 libsdsl 一样
+# 7. 把 liblemon 挪到项目根目录
 cd ..
 mv build/liblemon ../..
 
-# 6. 回到项目根目录
+# 8. 回到项目根目录
 cd ..
 echo "LEMON has been installed to $(pwd)/liblemon"
 
-# 7. 构建 Rust 库（rotations_poset）
+# 9. 构建 Rust 库（rotations_poset）
 echo ""
 echo "Building Rust library (rotations_poset)..."
 if command -v cargo >/dev/null 2>&1; then

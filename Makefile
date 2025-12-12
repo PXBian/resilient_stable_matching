@@ -38,8 +38,15 @@ LIBS = -l$(RUST_LIB_NAME)
 RUST_LIB_SO = $(RUST_LIB_DIR)/lib$(RUST_LIB_NAME).so
 RUST_LIB_DYLIB = $(RUST_LIB_DIR)/lib$(RUST_LIB_NAME).dylib
 
-# 检查 cargo 是否可用
-CARGO = $(shell which cargo 2>/dev/null)
+# 检查 cargo 是否可用（尝试多个位置）
+CARGO = $(shell which cargo 2>/dev/null || echo "$(HOME)/.cargo/bin/cargo" 2>/dev/null)
+# 如果找到 cargo 路径，检查它是否可执行
+ifneq ($(CARGO),)
+    CARGO_EXISTS = $(shell test -x "$(CARGO)" && echo "yes" || echo "no")
+    ifeq ($(CARGO_EXISTS),no)
+        CARGO = 
+    endif
+endif
 
 .PHONY: all total clean rust-lib check-rust-lib help
 
@@ -49,7 +56,13 @@ all: total
 # 检查 Rust 库是否存在
 check-rust-lib:
 	@if [ ! -f "$(RUST_LIB_SO)" ] && [ ! -f "$(RUST_LIB_DYLIB)" ]; then \
-		if [ -z "$(CARGO)" ]; then \
+		CARGO_CMD=""; \
+		if command -v cargo >/dev/null 2>&1; then \
+			CARGO_CMD="cargo"; \
+		elif [ -x "$(HOME)/.cargo/bin/cargo" ]; then \
+			CARGO_CMD="$(HOME)/.cargo/bin/cargo"; \
+		fi; \
+		if [ -z "$$CARGO_CMD" ]; then \
 			echo "ERROR: Rust library not found and cargo is not installed."; \
 			echo ""; \
 			echo "Please install Rust and cargo first:"; \
@@ -63,7 +76,7 @@ check-rust-lib:
 			exit 1; \
 		else \
 			echo "Rust library not found, building..."; \
-			$(MAKE) rust-lib; \
+			CARGO=$$CARGO_CMD $(MAKE) rust-lib; \
 		fi; \
 	fi
 
@@ -77,16 +90,22 @@ $(TARGET): $(SOURCE)
 
 # 构建 Rust 库
 rust-lib:
-	@if [ -z "$(CARGO)" ]; then \
+	@CARGO_CMD=""; \
+	if command -v cargo >/dev/null 2>&1; then \
+		CARGO_CMD="cargo"; \
+	elif [ -x "$(HOME)/.cargo/bin/cargo" ]; then \
+		CARGO_CMD="$(HOME)/.cargo/bin/cargo"; \
+	fi; \
+	if [ -z "$$CARGO_CMD" ]; then \
 		echo "ERROR: cargo is not installed."; \
 		echo "Please install Rust and cargo first:"; \
 		echo "  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"; \
 		echo "  or: sudo apt install cargo"; \
 		exit 1; \
-	fi
-	@echo "Building Rust library..."
-	@cd rotations_poset && cargo build --release
-	@echo "Rust library built successfully"
+	fi; \
+	echo "Building Rust library..."; \
+	cd rotations_poset && $$CARGO_CMD build --release; \
+	echo "Rust library built successfully"
 
 # 清理
 clean:
@@ -106,6 +125,7 @@ help:
 	@echo "  make clean      - Remove compiled binary"
 	@echo "  make clean-all  - Remove all build artifacts including Rust library"
 	@echo "  make help       - Show this help message"
+
 
 
 
