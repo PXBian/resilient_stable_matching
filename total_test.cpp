@@ -154,14 +154,19 @@ int main(int argv, char** argc) {
     size_t n = stoi(argc[2]);
     int flowAmount = stoi(argc[3]);
 
-    // 使用二维数组存储（方便后续操作）
-    vector<vector<size_t>> arr_m(n, vector<size_t>(n, 0));
-    vector<vector<size_t>> arr_w(n, vector<size_t>(n, 0));
+    size_t* arr_m = new size_t[n * n];
+    size_t* arr_w = new size_t[n * n];
+    for (size_t i = 0; i < n * n; ++i) {
+        arr_m[i] = 0;
+        arr_w[i] = 0;
+    }
 
     // Read the input file
     ifstream input_file(input_file_name);
     if (!input_file.is_open()) {
         cout << "Error: Failed to open input file " << input_file_name << endl;
+        delete[] arr_m;
+        delete[] arr_w;
         return 1;
     }
     string line;
@@ -173,14 +178,14 @@ int main(int argv, char** argc) {
         if (line_count < n) {
             size_t m = line_count, w = 0;
             while (getline(ss, token, ' ')) {
-                arr_m[m][w] = stoi(token);
+                arr_m[m * n + w] = stoi(token);
                 w++;
             }
         } 
         else {
             size_t w = line_count - n, m = 0;
             while (getline(ss, token, ' ')) {
-                arr_w[w][m] = stoi(token);
+                arr_w[w * n + m] = stoi(token);
                 m++;
             }
         }
@@ -188,25 +193,16 @@ int main(int argv, char** argc) {
     }
     input_file.close();
 
-    // 将二维数组转换为连续的一维数组供 C 接口使用
-    // 注意：vector<vector<size_t>> 在内存中不是完全连续的，需要手动复制
-    size_t* arr_m_flat = new size_t[n * n];
-    size_t* arr_w_flat = new size_t[n * n];
-    for (size_t i = 0; i < n; ++i) {
-        for (size_t j = 0; j < n; ++j) {
-            arr_m_flat[i * n + j] = arr_m[i][j];
-            arr_w_flat[i * n + j] = arr_w[i][j];
-        }
-    }
-
     // Construct the rotation poset
-    CPreferenceProfile pr = (CPreferenceProfile){ .men = arr_m_flat, .women = arr_w_flat, .len = n };
+    CPreferenceProfile pr = (CPreferenceProfile){ .men = arr_m, .women = arr_w, .len = n };
     CRotationPoset rotation_poset = get_rotation_poset(&pr);
 
-    std::cout << "Number of dependencies: " << rotation_poset.len << std::endl;
-    std::cout << "Number of rotations: " << rotation_poset.n_rotations << std::endl;
+    delete[] arr_m;
+    delete[] arr_w;
 
-    // 保存 rotation_poset 的数据，因为后面会释放它
+    cout << "Number of dependencies: " << rotation_poset.len << std::endl;
+    cout << "Number of rotations: " << rotation_poset.n_rotations << std::endl;
+
     size_t n_rotations = rotation_poset.n_rotations;
 
     // Construct the forcing graph with info on arcs
@@ -218,7 +214,6 @@ int main(int argv, char** argc) {
         CDependency dependency = dependencies[i];
         int from = dependency.from;
         int to = dependency.to;
-        // man 和 woman 暂时未使用，但保留以备将来使用
         // int man = dependency.generator.man;
         // int woman = dependency.generator.woman;
 
@@ -237,7 +232,6 @@ int main(int argv, char** argc) {
         }
     }
 
-    // 现在可以安全地释放 rotation_poset
     free_c_rotation_poset(rotation_poset);
 
     ListDigraph graph;
@@ -248,23 +242,23 @@ int main(int argv, char** argc) {
     ListDigraph::ArcMap<string> arcLabel(graph);
 
 
-    vector<ListDigraph::Node> nodes(n_rotations);  // 索引从0开始
+    vector<ListDigraph::Node> nodes(n_rotations);
     for (size_t i = 0; i < n_rotations; ++i) {
         nodes[i] = graph.addNode();
         supply[nodes[i]] = 0;
     }
 
-    ListDigraph::Node s = nodes[0];  // 源节点索引为0
-    ListDigraph::Node t = nodes[n_rotations - 1];  // 汇节点索引为n_rotations-1
+    ListDigraph::Node s = nodes[0];
+    ListDigraph::Node t = nodes[n_rotations - 1];
 
     supply[s] = flowAmount;
     supply[t] = -flowAmount;
 
     
-    N = n_rotations;  // 图是基于旋转构建的，所以使用旋转数量
-    int s_index = 0;  // 索引从0开始
-    int t_index = n_rotations - 1;  // 索引从0开始
-    vector<vector<Edge>> G(N);  // 索引从0开始
+    N = n_rotations;
+    int s_index = 0; 
+    int t_index = n_rotations - 1;
+    vector<vector<Edge>> G(N);
 
     int arcCounter = 0;
 
@@ -274,9 +268,8 @@ int main(int argv, char** argc) {
         int edge_cost = info.first;
         int edge_capacity = info.second;
 
-        // 确保索引在有效范围内（索引从0开始）
         if (from_idx < 0 || from_idx >= (int)n_rotations || to_idx < 0 || to_idx >= (int)n_rotations) {
-            continue;  // 跳过无效的边
+            continue;
         }
 
         ListDigraph::Arc b = graph.addArc(nodes[from_idx], nodes[to_idx]);
@@ -285,16 +278,14 @@ int main(int argv, char** argc) {
         arcLabel[b] = to_string(from_idx) + "->" + to_string(to_idx) + "#" + to_string(arcCounter);
         arcCounter++;
 
-        // self-implemented
+        // self-implemented graph G
         addEdge(G, from_idx, to_idx, edge_capacity, edge_cost);
     }
 
     // Capacity Scaling
     auto prog_start = chrono::high_resolution_clock::now();
     CapacityScaling<ListDigraph, int, int> cs_mcf(graph);
-    cs_mcf.costMap(cost)
-       .upperMap(capacity)
-       .supplyMap(supply);
+    cs_mcf.costMap(cost).upperMap(capacity).supplyMap(supply);
 
     auto cs_result = cs_mcf.run();
     auto prog_end = chrono::high_resolution_clock::now();
@@ -318,9 +309,7 @@ int main(int argv, char** argc) {
     // NetworkSimplex
     prog_start = chrono::high_resolution_clock::now();
     NetworkSimplex<ListDigraph, int, int> ns_mcf(graph);
-    ns_mcf.costMap(cost)
-       .upperMap(capacity)
-       .supplyMap(supply);
+    ns_mcf.costMap(cost).upperMap(capacity).supplyMap(supply);
 
     auto ns_result = ns_mcf.run();
     prog_end = chrono::high_resolution_clock::now();
@@ -344,9 +333,7 @@ int main(int argv, char** argc) {
     // CostScaling
     prog_start = chrono::high_resolution_clock::now();
     CostScaling<ListDigraph, int, int> cost_mcf(graph);
-    cost_mcf.costMap(cost)
-       .upperMap(capacity)
-       .supplyMap(supply);
+    cost_mcf.costMap(cost).upperMap(capacity).supplyMap(supply);
 
     auto cost_result = cost_mcf.run();
     prog_end = chrono::high_resolution_clock::now();
@@ -417,10 +404,6 @@ int main(int argv, char** argc) {
              << ", flow = " << flowAmount
              << ", min_cost = " << min_cost << "\n";
     }
-
-    // 释放内存
-    delete[] arr_m_flat;
-    delete[] arr_w_flat;
 
     return 0;
 }
