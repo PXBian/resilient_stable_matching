@@ -172,7 +172,7 @@ int main(int argv, char** argc) {
     string line;
     size_t line_count = 0;
     while (getline(input_file, line)) {
-        cout << line << endl;
+        // cout << line << endl;
         stringstream ss(line);
         string token;
         if (line_count < n) {
