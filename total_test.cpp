@@ -283,6 +283,8 @@ int main(int argv, char** argc) {
         }
     }
 
+    cout << "Number of arcs: " << arc_infos.size() << endl;
+
     // 现在可以安全地释放 rotation_poset
     free_c_rotation_poset(rotation_poset);
 

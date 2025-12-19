@@ -9,7 +9,7 @@ Generate individualized stable-marriage preference lists from a CSV.
 
 Output formats:
   --output-format ids (default) -> preferences over IDs (taxi_id 'x100', passenger_id 'y50')
-  --output-format indices       -> preferences over indices 1..n, with mapping exported in TAXI_idx_map.csv
+  --output-format indices       -> preferences over indices 0..n-1, with mapping exported in TAXI_idx_map.csv
 
 Optional CSV mapping (--out-map-csv) has rows for both papers and reviewers.
 
@@ -159,7 +159,7 @@ def main():
     p.add_argument("--temp-x", type=float, default=0.25, help="temperature for X's preferences (lower = closer to metric)")
     p.add_argument("--temp-y", type=float, default=0.25, help="temperature for Y's preferences (lower = closer to metric)")
     p.add_argument("--output-format", choices=["ids","indices"], default="ids",
-                   help="ids: keep x1/y1 labels (default); indices: output 1..n indices for both sides")
+                   help="ids: keep x1/y1 labels (default); indices: output 0..n-1 indices for both sides")
     p.add_argument("--out-json", default=None)
     p.add_argument("--out-txt", default=None)
     p.add_argument("--out-map-csv", default=None, help="Optional CSV mapping indices↔IDs for both sides")
@@ -179,10 +179,10 @@ def main():
     # Build index mappings if requested
     use_indices = (args.output_format == "indices")
     if use_indices:
-        x_to_idx = {x: i+1 for i, x in enumerate(x_ids)}
-        y_to_idx = {y: j+1 for j, y in enumerate(y_ids)}
-        idx_to_x = {i+1: x for i, x in enumerate(x_ids)}
-        idx_to_y = {j+1: y for j, y in enumerate(y_ids)}
+        x_to_idx = {x: i for i, x in enumerate(x_ids)}
+        y_to_idx = {y: j for j, y in enumerate(y_ids)}
+        idx_to_x = {i: x for i, x in enumerate(x_ids)}
+        idx_to_y = {j: y for j, y in enumerate(y_ids)}
 
         # Convert prefs to indices
         x_prefs = {x_to_idx[x]: [y_to_idx[y] for y in x_prefs_ids[x]] for x in x_ids}
@@ -192,24 +192,23 @@ def main():
         y_prefs = y_prefs_ids
         x_to_idx = y_to_idx = idx_to_x = idx_to_y = None
 
-    # Quick peek
-    def preview_ids(title, d, keys, k=5, m=20):
-        print(f"\n{title} (showing {k} lists; top {m} choices):")
+    # Small preview
+    def preview_ids(title, d, keys, k=3, m=10):
+        print(f"\n{title} (showing {k} agents; top {m} choices each):")
         for a in keys[:k]:
             print(f"  {a}: {' '.join(d[a][:m])}")
 
-    def preview_indices(title, d, keys, k=5, m=20):
-        print(f"\n{title} (indices) (showing {k} lists; top {m} choices):")
+    def preview_indices(title, d, keys, k=3, m=10):
+        print(f"\n{title} (indices) (showing {k} agents; top {m} choices each):")
         for a in keys[:k]:
-            top = ' '.join(str(t) for t in d[a][:m])
-            print(f"  {a}: {top}")
+            print(f"  {a}: {' '.join(str(t) for t in d[a][:m])}")
 
     if use_indices:
-        preview_indices("X→Y preferences", x_prefs, sorted(x_prefs.keys()))
-        preview_indices("Y→X preferences", y_prefs, sorted(y_prefs.keys()))
+        preview_indices("X (taxis) → Y (passengers)", x_prefs, sorted(x_prefs.keys()))
+        preview_indices("Y (passengers) → X (taxis)", y_prefs, sorted(y_prefs.keys()))
     else:
-        preview_ids("X→Y preferences", x_prefs, x_ids)
-        preview_ids("Y→X preferences", y_prefs, y_ids)
+        preview_ids("X (taxis) → Y (passengers)", x_prefs, x_ids)
+        preview_ids("Y (passengers) → X (taxis)", y_prefs, y_ids)
 
     # JSON output
     if args.out_json:
@@ -229,26 +228,26 @@ def main():
             })
         with open(args.out_json, "w") as f:
             json.dump(payload, f, indent=2)
-        print(f"\nWrote JSON instance to: {args.out_json}")
+        print(f"\nWrote JSON: {args.out_json}")
 
     # TXT output
     if args.out_txt:
         with open(args.out_txt, "w") as f:
             if use_indices:
-                f.write("X side (taxis indices) preferences over Y (passengers indices):\n")
+                # f.write("X side (taxis indices) preferences over Y (passengers indices):\n")
                 for xi in sorted(x_prefs.keys()):
-                    f.write(f"{xi}: {' '.join(str(t) for t in x_prefs[xi])}\n")
-                f.write("\nY side (passengers indices) preferences over X (taxis indices):\n")
+                    f.write(f"{' '.join(str(t) for t in x_prefs[xi])}\n")
+                # f.write("\nY side (passengers indices) preferences over X (taxis indices):\n")
                 for yi in sorted(y_prefs.keys()):
-                    f.write(f"{yi}: {' '.join(str(t) for t in y_prefs[yi])}\n")
+                    f.write(f"{' '.join(str(t) for t in y_prefs[yi])}\n")
             else:
-                f.write("X side (taxis) preferences over Y (passengers):\n")
+                # f.write("X side (taxis) preferences over Y (passengers):\n")
                 for x in x_ids:
-                    f.write(f"{x}: {' '.join(x_prefs[x])}\n")
-                f.write("\nY side (passengers) preferences over X (taxis):\n")
+                    f.write(f"{' '.join(x_prefs[x])}\n")
+                # f.write("\nY side (passengers) preferences over X (taxis):\n")
                 for y in y_ids:
-                    f.write(f"{y}: {' '.join(y_prefs[y])}\n")
-        print(f"Wrote text instance to: {args.out_txt}")
+                    f.write(f"{' '.join(y_prefs[y])}\n")
+        print(f"Wrote TXT: {args.out_txt}")
 
     # Mapping CSV (optional)
     if args.out_map_csv:
@@ -256,9 +255,9 @@ def main():
             w = csv.writer(f)
             if use_indices:
                 w.writerow(["side","index","id"])
-                for i, x in enumerate(x_ids, start=1):
+                for i, x in enumerate(x_ids):
                     w.writerow(["X", i, x])
-                for j, y in enumerate(y_ids, start=1):
+                for j, y in enumerate(y_ids):
                     w.writerow(["Y", j, y])
             else:
                 w.writerow(["side","id"])
