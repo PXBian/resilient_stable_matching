@@ -1,0 +1,36 @@
+Number of dependencies: 7704971
+Number of rotations: 239
+Number of arcs: 19152
+Starting NetworkSimplex algorithm...
+The network simplex runtime is 0.00148672 s.
+OK (LEMON NetworkSimplex). n = 5000, flow = 4000, total_cost = 6220
+
+///////////////////////////// RUNTIME STATISTICS //////////////////////////////
+Construct poset time: 1.94918 s.
+LEMON graph construction time: 0.00186345 s.
+NetworkSimplex algorithm runtime: 0.00148672 s.
+Total time (poset + graph + algorithm): 1.95253 s.
+Total program time: 2.06477 s.
+	Command being timed: "./network_simplex data/ADM_rand_5000_instance.txt 5000 4000"
+	User time (seconds): 3.08
+	System time (seconds): 0.74
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.84
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 1892864
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 472719
+	Voluntary context switches: 1
+	Involuntary context switches: 501
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 8
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

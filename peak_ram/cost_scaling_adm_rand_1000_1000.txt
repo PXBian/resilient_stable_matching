@@ -1,0 +1,36 @@
+Number of dependencies: 252262
+Number of rotations: 60
+Number of arcs: 1280
+Starting CostScaling algorithm...
+The cost scaling runtime is 0.00044575 s.
+OK (LEMON CostScaling). n = 1000, flow = 1000, total_cost = 1771
+
+///////////////////////////// RUNTIME STATISTICS //////////////////////////////
+Construct poset time: 0.0427848 s.
+LEMON graph construction time: 0.0001265 s.
+CostScaling algorithm runtime: 0.00044575 s.
+Total time (poset + graph + algorithm): 0.0433571 s.
+Total program time: 0.0459757 s.
+	Command being timed: "./cost_scaling data/ADM_rand_1000_instance.txt 1000 1000"
+	User time (seconds): 0.07
+	System time (seconds): 0.02
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.10
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 77312
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 18642
+	Voluntary context switches: 1
+	Involuntary context switches: 29
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 8
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

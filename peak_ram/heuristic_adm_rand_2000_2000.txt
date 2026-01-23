@@ -1,0 +1,33 @@
+Number of dependencies: 1020017
+Number of rotations: 78
+The heuristic runtime is 0.00413385 s.
+OK (Heuristic). n = 2000, flow = 2000, total_cost = 3394
+
+///////////////////////////// RUNTIME STATISTICS //////////////////////////////
+Construct poset time: 0.324391 s.
+Heuristic algorithm runtime: 0.00413385 s.
+Total time (poset + algorithm): 0.328525 s.
+Total program time: 0.328618 s.
+	Command being timed: "./heuristic data/ADM_rand_2000_instance.txt 2000 2000"
+	User time (seconds): 0.51
+	System time (seconds): 0.12
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.64
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 297856
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 73818
+	Voluntary context switches: 1
+	Involuntary context switches: 159
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 8
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

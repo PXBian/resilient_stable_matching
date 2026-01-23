@@ -288,7 +288,8 @@ int main(int argv, char** argc) {
     // 现在可以安全地释放 rotation_poset
     free_c_rotation_poset(rotation_poset);
 
-    auto force_graph_start = chrono::high_resolution_clock::now();
+    // Build LEMON graph
+    auto lemon_graph_start = chrono::high_resolution_clock::now();
 
     ListDigraph graph;
 
@@ -310,12 +311,6 @@ int main(int argv, char** argc) {
     supply[s] = flowAmount;
     supply[t] = -flowAmount;
 
-    
-    N = n_rotations;  // 图是基于旋转构建的，所以使用旋转数量
-    int s_index = 0;
-    int t_index = n_rotations - 1;
-    vector<vector<Edge>> G(N);  // 索引从0开始
-
     int arcCounter = 0;
 
     for (const auto& [edge, info] : arc_infos) {
@@ -334,18 +329,44 @@ int main(int argv, char** argc) {
         capacity[b] = edge_capacity;
         arcLabel[b] = to_string(from_idx) + "->" + to_string(to_idx) + "#" + to_string(arcCounter);
         arcCounter++;
+    }
+
+    auto lemon_graph_end = chrono::high_resolution_clock::now();
+    double lemon_graph_time = chrono::duration<double>(lemon_graph_end - lemon_graph_start).count();
+
+    // Build self-implemented graph
+    auto self_graph_start = chrono::high_resolution_clock::now();
+
+    N = n_rotations;  // 图是基于旋转构建的，所以使用旋转数量
+    int s_index = 0;
+    int t_index = n_rotations - 1;
+    vector<vector<Edge>> G(N);  // 索引从0开始
+
+    for (const auto& [edge, info] : arc_infos) {
+        int from_idx = edge.first;
+        int to_idx = edge.second;
+        int edge_cost = info.first;
+        int edge_capacity = info.second;
+
+        // 确保索引在有效范围内（rotation索引从0开始）
+        if (from_idx < 0 || from_idx >= (int)n_rotations || to_idx < 0 || to_idx >= (int)n_rotations) {
+            continue;  // 跳过无效的边
+        }
 
         // self-implemented
         addEdge(G, from_idx, to_idx, edge_capacity, edge_cost);
     }
 
-    auto force_graph_end = chrono::high_resolution_clock::now();
-    double force_graph_time = chrono::duration<double>(force_graph_end - force_graph_start).count();
+    auto self_graph_end = chrono::high_resolution_clock::now();
+    double self_graph_time = chrono::duration<double>(self_graph_end - self_graph_start).count();
+    
+    double force_graph_time = lemon_graph_time + self_graph_time;
 
     long long cs_cost = -1, ns_cost = -1, cost_scaling_cost = -1;  // Store costs from each algorithm
     bool cs_optimal = false, ns_optimal = false, cost_scaling_optimal = false, ssp_optimal = false;
 
     // Capacity Scaling
+    cout << "Starting CapacityScaling algorithm..." << endl;
     prog_start = chrono::high_resolution_clock::now();
     CapacityScaling<ListDigraph, int, int> cs_mcf(graph);
     cs_mcf.costMap(cost)
@@ -353,13 +374,17 @@ int main(int argv, char** argc) {
        .supplyMap(supply);
 
     auto cs_result = cs_mcf.run();
+    
+    if (cs_result == CapacityScaling<ListDigraph, int, int>::OPTIMAL) {
+        cs_cost = cs_mcf.totalCost();
+    }
+    
     auto prog_end = chrono::high_resolution_clock::now();
     double cs_run_time = chrono::duration<double>(prog_end - prog_start).count();
 
     cout << "The capacity scaling runtime is " << cs_run_time << " s." << endl;
 
     if (cs_result == CapacityScaling<ListDigraph, int, int>::OPTIMAL) {
-        cs_cost = cs_mcf.totalCost();
         cs_optimal = true;
         cout << "OK (LEMON CapacityScaling). "
              << "n = " << n
@@ -370,9 +395,14 @@ int main(int argv, char** argc) {
     } else if (cs_result == CapacityScaling<ListDigraph, int, int>::UNBOUNDED) {
         cout << "The problem is UNBOUNDED." << endl;
     }
+    else {
+        cout << "EXCEPTION! cs_result = " << cs_result << endl;
+    }
+    
 
 
     // NetworkSimplex
+    cout << "Starting NetworkSimplex algorithm..." << endl;
     prog_start = chrono::high_resolution_clock::now();
     NetworkSimplex<ListDigraph, int, int> ns_mcf(graph);
     ns_mcf.costMap(cost)
@@ -380,13 +410,18 @@ int main(int argv, char** argc) {
        .supplyMap(supply);
 
     auto ns_result = ns_mcf.run();
+    
+    if (ns_result == NetworkSimplex<ListDigraph, int, int>::OPTIMAL) {
+        ns_cost = ns_mcf.totalCost();
+    }
+    
     prog_end = chrono::high_resolution_clock::now();
     double ns_run_time = chrono::duration<double>(prog_end - prog_start).count();
 
     cout << "The network simplex runtime is " << ns_run_time << " s." << endl;
 
     if (ns_result == NetworkSimplex<ListDigraph, int, int>::OPTIMAL) {
-        ns_cost = ns_mcf.totalCost();
+        cout << "ns_result = " << ns_result << endl;
         ns_optimal = true;
         cout << "OK (LEMON NetworkSimplex). "
              << "n = " << n
@@ -397,9 +432,13 @@ int main(int argv, char** argc) {
     } else if (ns_result == NetworkSimplex<ListDigraph, int, int>::UNBOUNDED) {
         cout << "The problem is UNBOUNDED." << endl;
     }
+    else {
+        cout << "EXCEPTION! ns_result = " << ns_result << endl;
+    }
 
 
     // CostScaling
+    cout << "Starting CostScaling algorithm..." << endl;
     prog_start = chrono::high_resolution_clock::now();
     CostScaling<ListDigraph, int, int> cost_mcf(graph);
     cost_mcf.costMap(cost)
@@ -407,13 +446,17 @@ int main(int argv, char** argc) {
        .supplyMap(supply);
 
     auto cost_result = cost_mcf.run();
+    
+    if (cost_result == CostScaling<ListDigraph, int, int>::OPTIMAL) {
+        cost_scaling_cost = cost_mcf.totalCost();
+    }
+    
     prog_end = chrono::high_resolution_clock::now();
     double cost_run_time = chrono::duration<double>(prog_end - prog_start).count();
 
     cout << "The cost scaling runtime is " << cost_run_time << " s." << endl;
 
     if (cost_result == CostScaling<ListDigraph, int, int>::OPTIMAL) {
-        cost_scaling_cost = cost_mcf.totalCost();
         cost_scaling_optimal = true;
         cout << "OK (LEMON CostScaling). "
              << "n = " << n
@@ -424,37 +467,13 @@ int main(int argv, char** argc) {
     } else if (cost_result == CostScaling<ListDigraph, int, int>::UNBOUNDED) {
         cout << "The problem is UNBOUNDED." << endl;
     }
-
-
-    // // CycleCanceling
-    // prog_start = chrono::high_resolution_clock::now();
-    // CycleCanceling<ListDigraph, int, int> cc_mcf(graph);
-    // cc_mcf.costMap(cost)
-    //    .upperMap(capacity)
-    //    .supplyMap(supply);
-
-    // auto cc_result = cc_mcf.run();
-    // prog_end = chrono::high_resolution_clock::now();
-    // double cc_run_time = chrono::duration<double>(prog_end - prog_start).count();
-
-    // cout << "The cycle canceling runtime is " << cc_run_time << " s." << endl;
-
-    // if (cc_result == CycleCanceling<ListDigraph, int, int>::OPTIMAL) {
-    //     long long totalCost = cc_mcf.totalCost();
-    //     cout << "OK (LEMON CycleCanceling). "
-    //          << "n = " << n
-    //          << ", max_deg = " << max_deg
-    //          << ", flow = " << flowAmount
-    //          << ", total_cost = " << totalCost << "\n";
-    // } else if (cc_result == CycleCanceling<ListDigraph, int, int>::INFEASIBLE) {
-    //     cout << "The problem is INFEASIBLE." << endl;
-    // } else if (cc_result == CycleCanceling<ListDigraph, int, int>::UNBOUNDED) {
-    //     cout << "The problem is UNBOUNDED." << endl;
-    // }
-
+    else {
+        cout << "EXCEPTION! cost_result = " << cost_result << endl;
+    }
 
     
     // self-implemented SSP
+    cout << "Starting self-implemented SSP algorithm..." << endl;
     prog_start = chrono::high_resolution_clock::now();
     auto ssp_result = minCost(G, s_index, t_index, flowAmount);
     int actual_flow = ssp_result.first;
@@ -488,12 +507,13 @@ int main(int argv, char** argc) {
          << ", flow = " << flowAmount
          << ", total_cost = " << heuristic_cost << "\n";
 
-    // Calculate total times for each algorithm
-    double cs_total_time = poset_time + force_graph_time + cs_run_time;
-    double ns_total_time = poset_time + force_graph_time + ns_run_time;
-    double cost_total_time = poset_time + force_graph_time + cost_run_time;
-    double ssp_total_time = poset_time + force_graph_time + ssp_run_time;
-    double heuristic_total_time = poset_time + heuristic_run_time;
+    // Calculate total times for each algorithm （except preprocessing: poset construct）
+    // LEMON algorithms use lemon_graph_time, SSP uses self_graph_time
+    double cs_total_time = lemon_graph_time + cs_run_time;
+    double ns_total_time = lemon_graph_time + ns_run_time;
+    double cost_total_time = lemon_graph_time + cost_run_time;
+    double ssp_total_time = self_graph_time + ssp_run_time;
+    double heuristic_total_time = heuristic_run_time;
 
     cout << "\n///////////////////////////// RESULTS //////////////////////////////" << endl;
     
@@ -537,7 +557,10 @@ int main(int argv, char** argc) {
         cout << "WARNING: No exact method found an optimal solution." << endl;
     }
     
-    cout << "Construct poset time: " << poset_time << " s, force graph time: " << force_graph_time << " s." << endl;
+    cout << "Construct poset time: " << poset_time << " s." << endl;
+    cout << "LEMON graph construction time: " << lemon_graph_time << " s." << endl;
+    cout << "Self-implemented graph construction time: " << self_graph_time << " s." << endl;
+    cout << "Total force graph time: " << force_graph_time << " s." << endl;
     cout << "LEMON CapacityScaling total time: " << cs_total_time << " s." << endl;
     cout << "LEMON NetworkSimplex total time: " << ns_total_time << " s." << endl;
     cout << "LEMON CostScaling total time: " << cost_total_time << " s." << endl;

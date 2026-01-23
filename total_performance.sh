@@ -22,6 +22,12 @@ make total
 # (/usr/bin/time -v ./total data/ADM_new_5000_instance.txt  5000  4000 ) &> peak_ram/total_adm_new_5000_4000.txt
 # (/usr/bin/time -v ./total data/ADM_new_5000_instance.txt  5000  5000 ) &> peak_ram/total_adm_new_5000_5000.txt
 
+# (/usr/bin/time -v ./total data/ADM_rand_5000_instance.txt  5000  1000 ) &> peak_ram/total_adm_rand_5000_1000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_5000_instance.txt  5000  2000 ) &> peak_ram/total_adm_rand_5000_2000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_5000_instance.txt  5000  3000 ) &> peak_ram/total_adm_rand_5000_3000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_5000_instance.txt  5000  4000 ) &> peak_ram/total_adm_rand_5000_4000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_5000_instance.txt  5000  5000 ) &> peak_ram/total_adm_rand_5000_5000.txt
+
 # (/usr/bin/time -v ./total data/ADM_rand_10000_instance.txt  10000  1000 ) &> peak_ram/total_adm_rand_10000_1000.txt
 # (/usr/bin/time -v ./total data/ADM_rand_10000_instance.txt  10000  2000 ) &> peak_ram/total_adm_rand_10000_2000.txt
 # (/usr/bin/time -v ./total data/ADM_rand_10000_instance.txt  10000  3000 ) &> peak_ram/total_adm_rand_10000_3000.txt
@@ -70,29 +76,98 @@ make total
 # (/usr/bin/time -v ./total data/ADM_rand_20000_instance.txt  20000  19000) &> peak_ram/total_adm_rand_20000_19000.txt
 # (/usr/bin/time -v ./total data/ADM_rand_20000_instance.txt  20000  20000) &> peak_ram/total_adm_rand_20000_20000.txt
 
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  1000 ) &> peak_ram/total_adm_rand_24000_1000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  2000 ) &> peak_ram/total_adm_rand_24000_2000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  3000 ) &> peak_ram/total_adm_rand_24000_3000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  4000 ) &> peak_ram/total_adm_rand_24000_4000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  5000 ) &> peak_ram/total_adm_rand_24000_5000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  6000 ) &> peak_ram/total_adm_rand_24000_6000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  7000 ) &> peak_ram/total_adm_rand_24000_7000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  8000 ) &> peak_ram/total_adm_rand_24000_8000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  9000 ) &> peak_ram/total_adm_rand_24000_9000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  10000) &> peak_ram/total_adm_rand_24000_10000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  11000) &> peak_ram/total_adm_rand_24000_11000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  12000) &> peak_ram/total_adm_rand_24000_12000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  13000) &> peak_ram/total_adm_rand_24000_13000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  14000) &> peak_ram/total_adm_rand_24000_14000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  15000) &> peak_ram/total_adm_rand_24000_15000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  16000) &> peak_ram/total_adm_rand_24000_16000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  17000) &> peak_ram/total_adm_rand_24000_17000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  18000) &> peak_ram/total_adm_rand_24000_18000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  19000) &> peak_ram/total_adm_rand_24000_19000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  20000) &> peak_ram/total_adm_rand_24000_20000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  21000) &> peak_ram/total_adm_rand_24000_21000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  22000) &> peak_ram/total_adm_rand_24000_22000.txt
-(/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  23000) &> peak_ram/total_adm_rand_24000_23000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  1000 ) &> peak_ram/total_adm_rand_21000_1000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  2000 ) &> peak_ram/total_adm_rand_21000_2000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  3000 ) &> peak_ram/total_adm_rand_21000_3000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  4000 ) &> peak_ram/total_adm_rand_21000_4000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  5000 ) &> peak_ram/total_adm_rand_21000_5000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  6000 ) &> peak_ram/total_adm_rand_21000_6000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  7000 ) &> peak_ram/total_adm_rand_21000_7000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  8000 ) &> peak_ram/total_adm_rand_21000_8000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  9000 ) &> peak_ram/total_adm_rand_21000_9000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  10000) &> peak_ram/total_adm_rand_21000_10000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  11000) &> peak_ram/total_adm_rand_21000_11000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  12000) &> peak_ram/total_adm_rand_21000_12000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  13000) &> peak_ram/total_adm_rand_21000_13000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  14000) &> peak_ram/total_adm_rand_21000_14000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  15000) &> peak_ram/total_adm_rand_21000_15000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  16000) &> peak_ram/total_adm_rand_21000_16000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  17000) &> peak_ram/total_adm_rand_21000_17000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  18000) &> peak_ram/total_adm_rand_21000_18000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  19000) &> peak_ram/total_adm_rand_21000_19000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  20000) &> peak_ram/total_adm_rand_21000_20000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_21000_instance.txt  21000  21000) &> peak_ram/total_adm_rand_21000_21000.txt
+
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  1000 ) &> peak_ram/total_adm_rand_22000_1000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  2000 ) &> peak_ram/total_adm_rand_22000_2000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  3000 ) &> peak_ram/total_adm_rand_22000_3000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  4000 ) &> peak_ram/total_adm_rand_22000_4000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  5000 ) &> peak_ram/total_adm_rand_22000_5000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  6000 ) &> peak_ram/total_adm_rand_22000_6000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  7000 ) &> peak_ram/total_adm_rand_22000_7000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  8000 ) &> peak_ram/total_adm_rand_22000_8000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  9000 ) &> peak_ram/total_adm_rand_22000_9000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  10000) &> peak_ram/total_adm_rand_22000_10000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  11000) &> peak_ram/total_adm_rand_22000_11000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  12000) &> peak_ram/total_adm_rand_22000_12000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  13000) &> peak_ram/total_adm_rand_22000_13000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  14000) &> peak_ram/total_adm_rand_22000_14000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  15000) &> peak_ram/total_adm_rand_22000_15000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  16000) &> peak_ram/total_adm_rand_22000_16000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  17000) &> peak_ram/total_adm_rand_22000_17000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  18000) &> peak_ram/total_adm_rand_22000_18000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  19000) &> peak_ram/total_adm_rand_22000_19000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  20000) &> peak_ram/total_adm_rand_22000_20000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  21000) &> peak_ram/total_adm_rand_22000_21000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_22000_instance.txt  22000  22000) &> peak_ram/total_adm_rand_22000_22000.txt
+
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  1000 ) &> peak_ram/total_adm_rand_23000_1000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  2000 ) &> peak_ram/total_adm_rand_23000_2000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  3000 ) &> peak_ram/total_adm_rand_23000_3000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  4000 ) &> peak_ram/total_adm_rand_23000_4000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  5000 ) &> peak_ram/total_adm_rand_23000_5000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  6000 ) &> peak_ram/total_adm_rand_23000_6000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  7000 ) &> peak_ram/total_adm_rand_23000_7000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  8000 ) &> peak_ram/total_adm_rand_23000_8000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  9000 ) &> peak_ram/total_adm_rand_23000_9000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  10000) &> peak_ram/total_adm_rand_23000_10000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  11000) &> peak_ram/total_adm_rand_23000_11000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  12000) &> peak_ram/total_adm_rand_23000_12000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  13000) &> peak_ram/total_adm_rand_23000_13000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  14000) &> peak_ram/total_adm_rand_23000_14000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  15000) &> peak_ram/total_adm_rand_23000_15000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  16000) &> peak_ram/total_adm_rand_23000_16000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  17000) &> peak_ram/total_adm_rand_23000_17000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  18000) &> peak_ram/total_adm_rand_23000_18000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  19000) &> peak_ram/total_adm_rand_23000_19000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  20000) &> peak_ram/total_adm_rand_23000_20000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  21000) &> peak_ram/total_adm_rand_23000_21000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  22000) &> peak_ram/total_adm_rand_23000_22000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_23000_instance.txt  23000  23000) &> peak_ram/total_adm_rand_23000_23000.txt
+
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  1000 ) &> peak_ram/total_adm_rand_24000_1000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  2000 ) &> peak_ram/total_adm_rand_24000_2000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  3000 ) &> peak_ram/total_adm_rand_24000_3000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  4000 ) &> peak_ram/total_adm_rand_24000_4000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  5000 ) &> peak_ram/total_adm_rand_24000_5000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  6000 ) &> peak_ram/total_adm_rand_24000_6000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  7000 ) &> peak_ram/total_adm_rand_24000_7000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  8000 ) &> peak_ram/total_adm_rand_24000_8000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  9000 ) &> peak_ram/total_adm_rand_24000_9000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  10000) &> peak_ram/total_adm_rand_24000_10000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  11000) &> peak_ram/total_adm_rand_24000_11000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  12000) &> peak_ram/total_adm_rand_24000_12000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  13000) &> peak_ram/total_adm_rand_24000_13000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  14000) &> peak_ram/total_adm_rand_24000_14000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  15000) &> peak_ram/total_adm_rand_24000_15000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  16000) &> peak_ram/total_adm_rand_24000_16000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  17000) &> peak_ram/total_adm_rand_24000_17000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  18000) &> peak_ram/total_adm_rand_24000_18000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  19000) &> peak_ram/total_adm_rand_24000_19000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  20000) &> peak_ram/total_adm_rand_24000_20000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  21000) &> peak_ram/total_adm_rand_24000_21000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  22000) &> peak_ram/total_adm_rand_24000_22000.txt
+# (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  23000) &> peak_ram/total_adm_rand_24000_23000.txt
 (/usr/bin/time -v ./total data/ADM_rand_24000_instance.txt  24000  24000) &> peak_ram/total_adm_rand_24000_24000.txt
 
 
