@@ -16,7 +16,7 @@ gunzip data/*.gz 2>/dev/null
 
 # 编译所有需要的程序
 make save_poset
-make cost_scaling_no_poset
+# make cost_scaling_no_poset
 make capacity_scaling_no_poset
 make network_simplex_no_poset
 make ssp_dijkstra_no_poset
@@ -75,7 +75,7 @@ declare -a methods=(
     "heuristic"
     "network_simplex"
     "ssp_dijkstra"
-    "cost_scaling"
+    # "cost_scaling"
 )
 
 # 对每个数据集
@@ -148,13 +148,13 @@ for dataset in "${datasets[@]}"; do
             echo "Running $method for dataset=$dataset, n=$n, flowAmount=$flowAmount"
             
             # 根据方法名称执行相应的命令
-            if [ "$method" = "cost_scaling" ]; then
-                # CostScaling 使用 timeout
-                (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling_no_poset "$poset_file") &> output/no_poset_cost_scaling_${dataset_prefix}_${n}_${flowAmount}.txt
-            else
+            # if [ "$method" = "cost_scaling" ]; then
+            #     # CostScaling 使用 timeout
+            #     (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling_no_poset "$poset_file") &> output/no_poset_cost_scaling_${dataset_prefix}_${n}_${flowAmount}.txt
+            # else
                 # 其他方法不使用 timeout
                 /usr/bin/time -v ./${method}_no_poset "$poset_file" &> output/no_poset_${method}_${dataset_prefix}_${n}_${flowAmount}.txt
-            fi
+            # fi
         done
         
         echo "Completed all test cases for method: $method"

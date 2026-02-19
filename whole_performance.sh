@@ -16,11 +16,11 @@ gunzip data/*.gz 2>/dev/null
 # 编译所有需要的程序
 make capacity_scaling
 make network_simplex
-make cost_scaling
+# make cost_scaling
 make ssp_dijkstra
 make heuristic
 
-定义数据集
+# 定义数据集
 declare -a datasets=(
     # "TAXI_new"
     "ADM_new"
@@ -82,7 +82,7 @@ declare -a methods=(
     "heuristic"
     "network_simplex"
     "ssp_dijkstra"
-    "cost_scaling"
+    # "cost_scaling"
 )
 
 # 对每个数据集
@@ -110,13 +110,13 @@ for dataset in "${datasets[@]}"; do
             echo "Running $method for dataset=$dataset, n=$n, flowAmount=$flowAmount"
             
             # 根据方法名称执行相应的命令
-            if [ "$method" = "cost_scaling" ]; then
-                # CostScaling 使用 timeout
-                (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling "$input_file" "$n" "$flowAmount") &> new_output/cost_scaling_${dataset_lower}_rand_${n}_${flowAmount}.txt
-            else
+            # if [ "$method" = "cost_scaling" ]; then
+            #     # CostScaling 使用 timeout
+            #     (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling "$input_file" "$n" "$flowAmount") &> new_output/cost_scaling_${dataset_lower}_rand_${n}_${flowAmount}.txt
+            # else
                 # 其他方法不使用 timeout
                 /usr/bin/time -v ./${method} "$input_file" "$n" "$flowAmount" &> new_output/${method}_${dataset_lower}_rand_${n}_${flowAmount}.txt
-            fi
+            # fi
         done
         
         echo "Completed all test cases for method: $method"
