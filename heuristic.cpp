@@ -115,6 +115,10 @@ int main(int argv, char** argc) {
 
     // 现在可以安全地释放 rotation_poset
     free_c_rotation_poset(rotation_poset);
+    
+    // 提前释放输入数组，减少内存占用
+    delete[] arr_m;
+    delete[] arr_w;
 
     auto total_end = chrono::high_resolution_clock::now();
     double total_time = chrono::duration<double>(total_end - total_start).count();
@@ -133,12 +137,7 @@ int main(int argv, char** argc) {
     cout << "\n///////////////////////////// RUNTIME STATISTICS //////////////////////////////" << endl;
     cout << "Construct poset time: " << poset_time << " s." << endl;
     cout << "Heuristic algorithm runtime: " << heuristic_run_time << " s." << endl;
-    cout << "Total time (poset + algorithm): " << poset_time + heuristic_run_time << " s." << endl;
     cout << "Total program time: " << total_time << " s." << endl;
-
-    // 释放内存
-    delete[] arr_m;
-    delete[] arr_w;
 
     return 0;
 }
