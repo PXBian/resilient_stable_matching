@@ -9,7 +9,7 @@ fi
 # 设置超时时间：任何任务运行超过2小时将被终止并跳过
 TIMEOUT_DURATION="2h"
 
-mkdir -p output
+mkdir -p no_poset_output
 mkdir -p poset_cache
 gunzip data/*.gz 2>/dev/null
 
@@ -22,47 +22,54 @@ make ssp_dijkstra_no_poset
 make heuristic_no_poset
 
 # 定义数据集
-# declare -a datasets=(
+declare -a datasets=(
 #     "TAXI_new"
-#     "ADM_new"
+    "ADM_new"
 #     "FOOD"
 #     "RAP"
 #     "BIKE"
-# )
+)
 
 
 # 定义测试用例
 declare -a test_cases=(
-    # "10000 5000"
-    # "10000 10000"
-    # "20000 5000"
-    # "20000 10000"
+    "10000 1"
+    "10000 10000"
+    "20000 1"
+    "20000 10000"
     # "20000 15000"
-    # "20000 20000"
-    # "30000 5000"
-    # "30000 10000"
+    "20000 20000"
+    "30000 1"
+    "30000 10000"
     # "30000 15000"
-    # "30000 20000"
+    "30000 20000"
     # "30000 25000"
-    # "30000 30000"
-    # "40000 5000"
-    # "40000 10000"
+    "30000 30000"
+    "40000 1"
+    "40000 10000"
     # "40000 15000"
-    # "40000 20000"
+    "40000 20000"
     # "40000 25000"
-    # "40000 30000"
+    "40000 30000"
     # "40000 35000"
-    # "40000 40000"
-    "50000 5000"
+    "40000 40000"
+    "50000 1"
     "50000 10000"
-    "50000 15000"
+    # "50000 15000"
     "50000 20000"
-    "50000 25000"
+    # "50000 25000"
     "50000 30000"
-    "50000 35000"
+    # "50000 35000"
     "50000 40000"
-    "50000 45000"
+    # "50000 45000"
     "50000 50000"
+    "60000 1"
+    "60000 10000"
+    "60000 20000"
+    "60000 30000"
+    "60000 40000"
+    "60000 50000"
+    "60000 60000"
 )
 
 # 定义方法数组
@@ -149,7 +156,7 @@ for dataset in "${datasets[@]}"; do
             #     (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling_no_poset "$poset_file") &> output/no_poset_cost_scaling_${dataset_prefix}_${n}_${flowAmount}.txt
             # else
                 # 其他方法不使用 timeout
-                /usr/bin/time -v ./${method}_no_poset "$poset_file" &> output/no_poset_${method}_${dataset_prefix}_${n}_${flowAmount}.txt
+                /usr/bin/time -v ./${method}_no_poset "$poset_file" &> no_poset_output/no_poset_${method}_${dataset_prefix}_${n}_${flowAmount}.txt
             # fi
         done
         

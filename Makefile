@@ -57,6 +57,10 @@ SSP_DIJKSTRA_NO_POSET_SOURCE = ssp_dijkstra_no_poset.cpp
 SSP_DIJKSTRA_NO_POSET_TARGET = ssp_dijkstra_no_poset
 HEURISTIC_NO_POSET_SOURCE = heuristic_no_poset.cpp
 HEURISTIC_NO_POSET_TARGET = heuristic_no_poset
+SAVE_POSET_SHARED_SOURCE = save_poset_shared.cpp
+SAVE_POSET_SHARED_TARGET = save_poset_shared
+SOLVER_NO_POSET_SHARED_SOURCE = solver_no_poset_shared.cpp
+SOLVER_NO_POSET_SHARED_TARGET = solver_no_poset_shared
 
 # 检查 cargo 是否可用
 CARGO = $(shell command -v cargo 2>/dev/null || echo "$(HOME)/.cargo/bin/cargo")
@@ -67,7 +71,7 @@ endif
 .PHONY: all total heuristic capacity_scaling network_simplex cost_scaling ssp_dijkstra \
         poset_only save_poset cost_scaling_no_poset capacity_scaling_no_poset \
         network_simplex_no_poset ssp_dijkstra_no_poset heuristic_no_poset \
-        clean rust-lib check-rust-lib help
+        save_poset_shared solver_no_poset_shared clean rust-lib check-rust-lib help
 
 # 默认目标
 all: total
@@ -81,6 +85,8 @@ help:
 	@echo "  make cost_scaling     - Compile cost_scaling.cpp to 'cost_scaling'"
 	@echo "  make ssp_dijkstra     - Compile ssp_dijkstra.cpp to 'ssp_dijkstra'"
 	@echo "  make poset_only            - Compile poset_only.cpp (poset construction only)"
+	@echo "  make save_poset_shared     - Compile save_poset_shared.cpp (poset cache without flow)"
+	@echo "  make solver_no_poset_shared - Compile solver_no_poset_shared.cpp (method+flow from cached poset)"
 	@echo "  make clean            - Remove compiled binaries"
 	@echo "  make rust-lib         - Build Rust library"
 
@@ -158,6 +164,12 @@ save_poset: check-rust-lib $(SAVE_POSET_SOURCE)
 	$(CXX) $(CXXFLAGS) -I. $(SAVE_POSET_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(SAVE_POSET_TARGET)
 	@echo "Build complete: $(SAVE_POSET_TARGET)"
 
+# 编译 save_poset_shared（保存与 flow 解耦的 poset 文件）
+save_poset_shared: check-rust-lib $(SAVE_POSET_SHARED_SOURCE)
+	@echo "Compiling $(SAVE_POSET_SHARED_SOURCE)..."
+	$(CXX) $(CXXFLAGS) -I. $(SAVE_POSET_SHARED_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(SAVE_POSET_SHARED_TARGET)
+	@echo "Build complete: $(SAVE_POSET_SHARED_TARGET)"
+
 # 编译 cost_scaling_no_poset（跳过poset construction）
 cost_scaling_no_poset: check-rust-lib $(COST_SCALING_NO_POSET_SOURCE)
 	@echo "Compiling $(COST_SCALING_NO_POSET_SOURCE)..."
@@ -188,11 +200,17 @@ heuristic_no_poset: check-rust-lib $(HEURISTIC_NO_POSET_SOURCE)
 	$(CXX) $(CXXFLAGS) -I. $(HEURISTIC_NO_POSET_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(HEURISTIC_NO_POSET_TARGET)
 	@echo "Build complete: $(HEURISTIC_NO_POSET_TARGET)"
 
+# 编译 solver_no_poset_shared（从缓存 poset 读取，flow 走命令行参数）
+solver_no_poset_shared: check-rust-lib $(SOLVER_NO_POSET_SHARED_SOURCE)
+	@echo "Compiling $(SOLVER_NO_POSET_SHARED_SOURCE)..."
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SOLVER_NO_POSET_SHARED_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(SOLVER_NO_POSET_SHARED_TARGET)
+	@echo "Build complete: $(SOLVER_NO_POSET_SHARED_TARGET)"
+
 # 清理
 clean:
 	rm -f $(TARGET) $(HEURISTIC_TARGET) $(CAPACITY_SCALING_TARGET) $(NETWORK_SIMPLEX_TARGET) $(COST_SCALING_TARGET) $(SSP_DIJKSTRA_TARGET) \
 	      $(POSET_ONLY_TARGET) $(SAVE_POSET_TARGET) \
+	      $(SAVE_POSET_SHARED_TARGET) $(SOLVER_NO_POSET_SHARED_TARGET) \
 	      $(COST_SCALING_NO_POSET_TARGET) $(CAPACITY_SCALING_NO_POSET_TARGET) \
 	      $(NETWORK_SIMPLEX_NO_POSET_TARGET) $(SSP_DIJKSTRA_NO_POSET_TARGET) $(HEURISTIC_NO_POSET_TARGET)
 	@echo "Cleaned all binaries"
-

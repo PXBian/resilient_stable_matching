@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --mem=350G
-#SBATCH --time=2-00:00:00
 
 # 加载 Rust 环境（如果存在）
 if [ -f "$HOME/.cargo/env" ]; then
@@ -10,7 +9,7 @@ fi
 # 设置超时时间：任何任务运行超过1小时将被终止并跳过
 TIMEOUT_DURATION="1h"
 
-mkdir -p V3_output
+mkdir -p runtime_output
 gunzip data/*.gz 2>/dev/null
 
 # 编译所有需要的程序
@@ -22,11 +21,11 @@ make heuristic
 
 # 定义数据集
 declare -a datasets=(
-    # "TAXI_new"
+    "TAXI_new"
     # "ADM_new"
     # "FOOD"
     # "RAP"
-    "BIKE"
+    # "BIKE"
 )
 
 
@@ -121,7 +120,7 @@ for dataset in "${datasets[@]}"; do
             #     (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling "$input_file" "$n" "$flowAmount") &> new_output/cost_scaling_${dataset_lower}_rand_${n}_${flowAmount}.txt
             # else
                 # 其他方法不使用 timeout
-                /usr/bin/time -v ./${method} "$input_file" "$n" "$flowAmount" &> V3_output/${method}_${dataset_lower}_rand_${n}_${flowAmount}.txt
+                /usr/bin/time -v ./${method} "$input_file" "$n" "$flowAmount" &> runtime_output/${method}_${dataset_lower}_rand_${n}_${flowAmount}.txt
             # fi
         done
         
