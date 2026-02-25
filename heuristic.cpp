@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
+#include <fstream>
 #include <bits/stdc++.h>
 #include "rotations_poset/rotations_poset.h"
 
@@ -113,6 +114,8 @@ int main(int argv, char** argc) {
     auto heuristic_end = chrono::high_resolution_clock::now();
     double heuristic_run_time = chrono::duration<double>(heuristic_end - heuristic_start).count();
 
+    size_t n_rotations = rotation_poset.n_rotations;
+    size_t arc_num = rotation_poset.len;
     // 现在可以安全地释放 rotation_poset
     free_c_rotation_poset(rotation_poset);
     
@@ -124,7 +127,7 @@ int main(int argv, char** argc) {
     double total_time = chrono::duration<double>(total_end - total_start).count();
 
     // Print results
-    cout << "The heuristic runtime is " << heuristic_run_time << " s." << endl;
+    // cout << "The heuristic runtime is " << heuristic_run_time << " s." << endl;
     if (flowAmount > (int)n) {
         cout << "Warning: flowAmount > n, flowAmount = " << flowAmount << ", n = " << n << endl;
     }
@@ -138,6 +141,28 @@ int main(int argv, char** argc) {
     cout << "Construct poset time: " << poset_time << " s." << endl;
     cout << "Heuristic algorithm runtime: " << heuristic_run_time << " s." << endl;
     cout << "Total program time: " << total_time << " s." << endl;
+
+    // Append runtime stats to CSV (dataset, method, n, flowAmount, total_cost, rotations_num, arc_num, poset_time, algorithm_runtime, graph_plus_algo_time, total_program_time)
+    {
+        string basename = input_file_name;
+        size_t slash = basename.find_last_of("/\\");
+        if (slash != string::npos) basename = basename.substr(slash + 1);
+        size_t inst = basename.find("_instance");
+        if (inst != string::npos) basename = basename.substr(0, inst);
+        size_t last_ = basename.rfind('_');
+        string dataset = (last_ != string::npos) ? basename.substr(0, last_) : basename;
+        ofstream csv("runtime_output/heuristic_runtime_stats.csv", ios::app);
+        if (csv.is_open()) {
+            if (csv.tellp() == 0) {
+                csv << "dataset,method,n,flowAmount,total_cost,rotations_num,arc_num,poset_time,algorithm_runtime,graph_plus_algo_time,total_program_time\n";
+            }
+            double graph_plus_algo_time = heuristic_run_time;  // 没有单独的图构建阶段
+            csv << dataset << ",heuristic," << n << "," << flowAmount << "," << heuristic_cost
+                << "," << n_rotations << "," << arc_num
+                << "," << poset_time << "," << heuristic_run_time << "," << graph_plus_algo_time << "," << total_time << "\n";
+            csv.close();
+        }
+    }
 
     return 0;
 }

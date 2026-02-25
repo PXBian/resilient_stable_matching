@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <chrono>
+#include <fstream>
 #include <bits/stdc++.h>
 #include "rotations_poset/rotations_poset.h"
 
@@ -217,6 +218,7 @@ int main(int argv, char** argc) {
     }
 
     cout << "Number of arcs: " << arc_infos.size() << endl;
+    size_t arc_num = arc_infos.size();
 
     // 现在可以安全地释放 rotation_poset
     free_c_rotation_poset(rotation_poset);
@@ -282,10 +284,33 @@ int main(int argv, char** argc) {
     // Runtime statistics
     cout << "\n///////////////////////////// RUNTIME STATISTICS //////////////////////////////" << endl;
     cout << "Construct poset time: " << poset_time << " s." << endl;
-    cout << "Self-implemented graph construction time: " << self_graph_time << " s." << endl;
-    cout << "SSP+Dijkstra algorithm runtime: " << ssp_run_time << " s." << endl;
-    cout << "Total time (graph + algorithm): " << self_graph_time + ssp_run_time << " s." << endl;
+    // cout << "Self-implemented graph construction time: " << self_graph_time << " s." << endl;
+    // cout << "SSP+Dijkstra algorithm runtime: " << ssp_run_time << " s." << endl;
+    double graph_plus_algo_time = self_graph_time + ssp_run_time;
+    cout << "Total time (graph + algorithm): " << graph_plus_algo_time << " s." << endl;
     cout << "Total program time: " << total_time << " s." << endl;
+
+    // Append runtime stats to CSV (dataset, method, n, flowAmount, total_cost, rotations_num, arc_num, poset_time, algorithm_runtime, graph_plus_algo_time, total_program_time)
+    {
+        string basename = input_file_name;
+        size_t slash = basename.find_last_of("/\\");
+        if (slash != string::npos) basename = basename.substr(slash + 1);
+        size_t inst = basename.find("_instance");
+        if (inst != string::npos) basename = basename.substr(0, inst);
+        size_t last_ = basename.rfind('_');
+        string dataset = (last_ != string::npos) ? basename.substr(0, last_) : basename;
+        long cost_out = (actual_flow >= 0 && actual_flow >= flowAmount) ? (long)min_cost : -1;
+        ofstream csv("runtime_output/ssp_dijkstra_runtime_stats.csv", ios::app);
+        if (csv.is_open()) {
+            if (csv.tellp() == 0) {
+                csv << "dataset,method,n,flowAmount,total_cost,rotations_num,arc_num,poset_time,algorithm_runtime,graph_plus_algo_time,total_program_time\n";
+            }
+            csv << dataset << ",ssp_dijkstra," << n << "," << flowAmount << "," << cost_out
+                << "," << n_rotations << "," << arc_num
+                << "," << poset_time << "," << ssp_run_time << "," << graph_plus_algo_time << "," << total_time << "\n";
+            csv.close();
+        }
+    }
 
     return 0;
 }

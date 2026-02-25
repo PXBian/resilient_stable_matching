@@ -193,8 +193,8 @@ int main(int argv, char** argc) {
     // Runtime statistics
     cout << "\n///////////////////////////// RUNTIME STATISTICS //////////////////////////////" << endl;
     cout << "Construct poset time: " << poset_time << " s." << endl;
-    cout << "LEMON graph construction time: " << lemon_graph_time << " s." << endl;
-    cout << "CostScaling algorithm runtime: " << cost_run_time << " s." << endl;
+    // cout << "LEMON graph construction time: " << lemon_graph_time << " s." << endl;
+    // cout << "CostScaling algorithm runtime: " << cost_run_time << " s." << endl;
     cout << "Total time (graph + algorithm): " << lemon_graph_time + cost_run_time << " s." << endl;
     cout << "Total program time: " << total_time << " s." << endl;
 

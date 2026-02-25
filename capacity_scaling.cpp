@@ -7,6 +7,7 @@
 #include <string>
 #include <map>
 #include <chrono>
+#include <fstream>
 #include <bits/stdc++.h>
 #include "rotations_poset/rotations_poset.h"
 
@@ -148,6 +149,7 @@ int main(int argv, char** argc) {
     }
     
     // 提前释放 arc_infos，减少内存占用
+    size_t arc_num = arc_infos.size();
     arc_infos.clear();
 
     auto lemon_graph_end = chrono::high_resolution_clock::now();
@@ -193,10 +195,33 @@ int main(int argv, char** argc) {
     // Runtime statistics
     cout << "\n///////////////////////////// RUNTIME STATISTICS //////////////////////////////" << endl;
     cout << "Construct poset time: " << poset_time << " s." << endl;
-    cout << "LEMON graph construction time: " << lemon_graph_time << " s." << endl;
-    cout << "CapacityScaling algorithm runtime: " << cs_run_time << " s." << endl;
-    cout << "Total time (graph + algorithm): " << lemon_graph_time + cs_run_time << " s." << endl;
+    // cout << "LEMON graph construction time: " << lemon_graph_time << " s." << endl;
+    // cout << "CapacityScaling algorithm runtime: " << cs_run_time << " s." << endl;
+    double graph_plus_algo_time = lemon_graph_time + cs_run_time;
+    cout << "Total time (graph + algorithm): " << graph_plus_algo_time << " s." << endl;
     cout << "Total program time: " << total_time << " s." << endl;
+
+    // Append runtime stats to CSV (dataset, method, n, flowAmount, total_cost, rotations_num, arc_num, poset_time, algorithm_runtime, graph_plus_algo_time, total_program_time)
+    {
+        string basename = input_file_name;
+        size_t slash = basename.find_last_of("/\\");
+        if (slash != string::npos) basename = basename.substr(slash + 1);
+        size_t inst = basename.find("_instance");
+        if (inst != string::npos) basename = basename.substr(0, inst);
+        size_t last_ = basename.rfind('_');
+        string dataset = (last_ != string::npos) ? basename.substr(0, last_) : basename;
+        long cost_out = (cs_result == CapacityScaling<ListDigraph, int, int>::OPTIMAL) ? (long)cs_cost : -1;
+        ofstream csv("runtime_output/capacity_scaling_runtime_stats.csv", ios::app);
+        if (csv.is_open()) {
+            if (csv.tellp() == 0) {
+                csv << "dataset,method,n,flowAmount,total_cost,rotations_num,arc_num,poset_time,algorithm_runtime,graph_plus_algo_time,total_program_time\n";
+            }
+            csv << dataset << ",capacity_scaling," << n << "," << flowAmount << "," << cost_out
+                << "," << n_rotations << "," << arc_num
+                << "," << poset_time << "," << cs_run_time << "," << graph_plus_algo_time << "," << total_time << "\n";
+            csv.close();
+        }
+    }
 
     return 0;
 }
