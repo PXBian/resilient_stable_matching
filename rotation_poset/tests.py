@@ -25,7 +25,7 @@ def initialization():
         except subprocess.CalledProcessError:
             sys.exit(1)
 
-    if not os.path.exists(CSV_FILE):
+    if not os.path.exists(CSV_FILE) or os.path.getsize(CSV_FILE) == 0:
         with open(CSV_FILE, "w") as f:
             f.write("Version,N,Seed,Time_ms,PeakMemory_KB\n")
 
