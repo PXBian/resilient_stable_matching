@@ -20,16 +20,20 @@ void run_test(const std::string& name, void (*func)(CPreferenceProfile), size_t 
     
     std::cout << "Test " << name << " with n=" << n << ", seed=" << seed << std::endl;
 
-    long memory_before = getPeakRSS()/1024; // Because I have a MacOS
+    long memory_before = getPeakRSS();
     
     auto start = std::chrono::high_resolution_clock::now();
     
-    // Esecuzione della tua funzione
     func(profile);
     
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = finish - start;
-    long memory_after = getPeakRSS()/1024;
+    long memory_after = getPeakRSS();
+
+    long memory_delta = memory_after - memory_before;
+    #ifdef __APPLE__
+        memory_delta /= 1024; // Convert from bytes to KB for macOS
+    #endif
 
     std::ofstream file("measurements.csv", std::ios::app);
     
@@ -38,7 +42,7 @@ void run_test(const std::string& name, void (*func)(CPreferenceProfile), size_t 
              << n << "," 
              << seed << "," 
              << duration.count() << "," 
-             << memory_after - memory_before << "\n";
+             << memory_delta << "\n";
         file.close();
     } else {
         std::cerr << "Impossible to open file measurements.csv" << std::endl;
