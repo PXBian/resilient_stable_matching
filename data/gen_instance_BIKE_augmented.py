@@ -26,13 +26,29 @@ python3 gen_instance_BIKE.py \
 
 import argparse
 import csv
+import hashlib
 import math
+import multiprocessing as mp
 import random
 from datetime import datetime
 from typing import List, Dict, Tuple, Optional
 from collections import defaultdict
 from dataclasses import dataclass
 import numpy as np
+import pandas as pd
+
+
+_BIKE_POOL_CTX = None
+
+
+def _stable_seed(*parts: object) -> int:
+    payload = "||".join(str(p) for p in parts).encode("utf-8")
+    return int.from_bytes(hashlib.blake2b(payload, digest_size=8).digest(), "big")
+
+
+def _init_bike_pool(ctx):
+    global _BIKE_POOL_CTX
+    _BIKE_POOL_CTX = ctx
 
 # ==================== Data Structures ====================
 
@@ -91,58 +107,64 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
 
 def load_trips(csv_path: str) -> List[Trip]:
     """Load and parse all trips from CSV"""
-    trips = []
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        header = next(reader)
-        cols = {name.strip().lower(): idx for idx, name in enumerate(header)}
-        
-        required = ["start_station", "end_station", "bike_id", "bike_type", 
-                   "start_time", "start_lat", "start_lon", "end_lat", "end_lon"]
-        missing = [r for r in required if r not in cols]
-        if missing:
-            raise ValueError(f"Missing columns: {missing}. Found: {list(cols.keys())}")
-        
-        for row in reader:
-            try:
-                start_station = row[cols["start_station"]].strip()
-                end_station = row[cols["end_station"]].strip()
-                bike_id = row[cols["bike_id"]].strip()
-                bike_type = row[cols["bike_type"]].strip()
-                start_time = row[cols["start_time"]].strip()
-                
-                if not all([start_station, end_station, bike_id, bike_type, start_time]):
-                    continue
-                
-                try:
-                    start_lat = float(row[cols["start_lat"]])
-                    start_lon = float(row[cols["start_lon"]])
-                    end_lat = float(row[cols["end_lat"]]) if row[cols["end_lat"]].strip() else None
-                    end_lon = float(row[cols["end_lon"]]) if row[cols["end_lon"]].strip() else None
-                except (ValueError, IndexError):
-                    continue
-                
-                try:
-                    end_time = row[cols.get("end_time", 0)].strip()
-                except (IndexError, KeyError):
-                    end_time = ""
-                
-                trips.append(Trip(
-                    trip_id=row[cols.get("trip_id", 0)],
-                    start_time=start_time,
-                    end_time=end_time,
-                    start_station=start_station,
-                    start_lat=start_lat,
-                    start_lon=start_lon,
-                    end_station=end_station,
-                    end_lat=end_lat,
-                    end_lon=end_lon,
-                    bike_id=bike_id,
-                    bike_type=bike_type
-                ))
-            except Exception:
-                continue
-    
+    required = ["start_station", "end_station", "bike_id", "bike_type",
+                "start_time", "start_lat", "start_lon", "end_lat", "end_lon"]
+
+    # Peek at header to detect optional columns
+    df_header = pd.read_csv(csv_path, nrows=0)
+    df_header.columns = df_header.columns.str.strip().str.lower()
+    usecols = required.copy()
+    for opt in ["end_time", "trip_id"]:
+        if opt in df_header.columns:
+            usecols.append(opt)
+
+    missing = [r for r in required if r not in df_header.columns]
+    if missing:
+        raise ValueError(f"Missing columns: {missing}. Found: {list(df_header.columns)}")
+
+    df = pd.read_csv(csv_path, usecols=lambda c: c.strip().lower() in usecols)
+    df.columns = df.columns.str.strip().str.lower()
+
+    # Coerce numeric columns and drop invalid rows
+    for col in ["start_lat", "start_lon", "end_lat", "end_lon"]:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    df.replace([float('inf'), float('-inf')], float('nan'), inplace=True)
+
+    # Cast string columns explicitly before filtering
+    for col in ["start_station", "end_station", "bike_id", "bike_type", "start_time"]:
+        df[col] = df[col].astype(str)
+
+    # Drop rows missing mandatory fields
+    df.dropna(subset=["start_lat", "start_lon"], inplace=True)
+    for col in ["start_station", "end_station", "bike_id", "bike_type", "start_time"]:
+        df = df[df[col].str.strip().astype(bool)]
+
+    if "end_time" not in df.columns:
+        df["end_time"] = ""
+    else:
+        df["end_time"] = df["end_time"].fillna("").astype(str).str.strip()
+
+    if "trip_id" not in df.columns:
+        df["trip_id"] = ""
+    else:
+        df["trip_id"] = df["trip_id"].fillna("").astype(str)
+
+    trips = [
+        Trip(
+            trip_id=str(row.trip_id),
+            start_time=str(row.start_time),
+            end_time=str(row.end_time),
+            start_station=str(row.start_station).strip(),
+            start_lat=float(row.start_lat),
+            start_lon=float(row.start_lon),
+            end_station=str(row.end_station).strip(),
+            end_lat=float(row.end_lat) if pd.notna(row.end_lat) else None,
+            end_lon=float(row.end_lon) if pd.notna(row.end_lon) else None,
+            bike_id=str(row.bike_id).strip(),
+            bike_type=str(row.bike_type).strip(),
+        )
+        for row in df.itertuples(index=False)
+    ]
     return trips
 
 def compute_bike_states(trips: List[Trip]) -> Dict[str, BikeState]:
@@ -220,30 +242,38 @@ def generate_synthetic_bikes(
     # Generate synthetic bikes
     synthetic = []
     n_needed = target_count - len(existing_bikes)
-    
+
     if n_needed > 0:
         types = list(type_probs.keys())
         type_probs_list = [type_probs[t] for t in types]
         stations = list(station_probs.keys()) if station_probs else []
         station_probs_list = [station_probs[s] for s in stations] if stations else []
-        
+
+        # Batch-sample bike types and stations in one call each (much faster than per-bike loop)
+        if len(types) > 0:
+            sampled_types = np.random.choice(types, size=n_needed, p=type_probs_list)
+        else:
+            sampled_types = ["standard"] * n_needed
+
+        if stations and station_probs_list:
+            sampled_stations = np.random.choice(stations, size=n_needed, p=station_probs_list)
+        else:
+            sampled_stations = None
+
         for i in range(n_needed):
-            # Sample bike type
-            bike_type = np.random.choice(types, p=type_probs_list) if len(types) > 0 else "standard"
-            
-            # Sample last_end_station
-            if stations and station_probs_list:
-                last_end_station = np.random.choice(stations, p=station_probs_list)
+            bike_type = str(sampled_types[i])
+
+            if sampled_stations is not None:
+                last_end_station = str(sampled_stations[i])
                 coords = station_coords_map.get(last_end_station)
                 last_end_lat = coords[0] if coords else None
                 last_end_lon = coords[1] if coords else None
             else:
-                # Fallback: use a random existing bike's location
                 base_bike = random.choice(existing_bikes)
                 last_end_station = base_bike.last_end_station
                 last_end_lat = base_bike.last_end_lat
                 last_end_lon = base_bike.last_end_lon
-            
+
             bike_id = f"SYN_BIKE_{len(existing_bikes) + i}"
             synthetic.append(BikeState(
                 bike_id=bike_id,
@@ -251,7 +281,7 @@ def generate_synthetic_bikes(
                 last_end_station=last_end_station,
                 last_end_lat=last_end_lat,
                 last_end_lon=last_end_lon,
-                last_end_time=None
+                last_end_time=None,
             ))
     
     return synthetic
@@ -355,9 +385,11 @@ def compute_bike_preference_scores(
     stations: List[str],
     station_demand: Dict[str, int],
     station_coords: Dict[str, Tuple[float, float]],
+    max_demand: float,
     alpha: float = 1.0,
     beta: float = 0.5,
-    individual_noise_scale: float = 0.3
+    individual_noise_scale: float = 0.3,
+    dist_cache: Optional[Dict[Tuple[str, str], float]] = None,
 ) -> List[float]:
     """
     Compute preference scores for a bike over all stations.
@@ -367,26 +399,20 @@ def compute_bike_preference_scores(
     """
     scores = []
     
-    # Normalize demand values
-    all_demands = list(station_demand.values())
-    max_demand = max(all_demands) if all_demands else 1.0
-    
-    # Generate bike-specific random seed from bike_id for consistent individual noise
-    bike_hash = hash(bike.bike_id) % (2**31)
-    rng = random.Random(bike_hash)
-    
     for station in stations:
         # Demand component
         demand = station_demand.get(station, 0)
         norm_demand = demand / max_demand if max_demand > 0 else 0.0
         
-        # Distance component
-        if bike.last_end_lat and bike.last_end_lon and station in station_coords:
+        # Distance component — use cache if available
+        if dist_cache is not None and (bike.bike_id, station) in dist_cache:
+            dist = dist_cache[(bike.bike_id, station)]
+            norm_dist = min(dist / 50.0, 1.0)
+        elif bike.last_end_lat and bike.last_end_lon and station in station_coords:
             dist = haversine_distance(
                 bike.last_end_lat, bike.last_end_lon,
                 station_coords[station][0], station_coords[station][1]
             )
-            # Normalize distance (assume max ~50km in city)
             norm_dist = min(dist / 50.0, 1.0)
         else:
             norm_dist = 1.0  # Penalty for unknown location
@@ -396,7 +422,7 @@ def compute_bike_preference_scores(
         
         # Add individual noise for this bike-station pair (increases diversity)
         # Use hash of bike_id + station_id for consistent but unique noise
-        pair_hash = hash((bike.bike_id, station)) % (2**31)
+        pair_hash = _stable_seed("pair_noise_bike_station", bike.bike_id, station)
         pair_rng = random.Random(pair_hash)
         individual_noise = pair_rng.gauss(0, individual_noise_scale)
         
@@ -413,7 +439,8 @@ def compute_station_preference_scores(
     station_coords: Dict[str, Tuple[float, float]],
     a: float = 1.0,
     b: float = 0.5,
-    individual_noise_scale: float = 0.3
+    individual_noise_scale: float = 0.3,
+    dist_cache: Optional[Dict[Tuple[str, str], float]] = None,
 ) -> List[float]:
     """
     Compute preference scores for a station over all bikes.
@@ -430,9 +457,6 @@ def compute_station_preference_scores(
     # Normalize distance (for all bikes)
     max_dist = 50.0  # Assume max distance
     
-    # Generate station-specific random seed for consistent individual noise
-    station_hash = hash(station) % (2**31)
-    
     for bike in bikes:
         # Type fit component
         if total_demand > 0:
@@ -441,8 +465,11 @@ def compute_station_preference_scores(
         else:
             type_fit = 0.5  # Neutral if no data
         
-        # Distance component
-        if bike.last_end_lat and bike.last_end_lon and station in station_coords:
+        # Distance component — use cache if available
+        if dist_cache is not None and (bike.bike_id, station) in dist_cache:
+            dist = dist_cache[(bike.bike_id, station)]
+            norm_dist = min(dist / max_dist, 1.0)
+        elif bike.last_end_lat and bike.last_end_lon and station in station_coords:
             dist = haversine_distance(
                 bike.last_end_lat, bike.last_end_lon,
                 station_coords[station][0], station_coords[station][1]
@@ -456,7 +483,7 @@ def compute_station_preference_scores(
         
         # Add individual noise for this station-bike pair (increases diversity)
         # Use hash of station + bike_id for consistent but unique noise
-        pair_hash = hash((station, bike.bike_id)) % (2**31)
+        pair_hash = _stable_seed("pair_noise_station_bike", station, bike.bike_id)
         pair_rng = random.Random(pair_hash)
         individual_noise = pair_rng.gauss(0, individual_noise_scale)
         
@@ -483,18 +510,57 @@ def zscore(xs: List[float]) -> List[float]:
     
     return [nz(x) for x in xs]
 
-def gumbel() -> float:
+def gumbel(rng: Optional[random.Random] = None) -> float:
     """Sample from standard Gumbel distribution"""
-    u = random.random()
+    if rng is None:
+        u = random.random()
+    else:
+        u = rng.random()
     return -math.log(-math.log(max(u, 1e-12)))
 
-def pl_permutation(scores: List[float], temperature: float) -> List[int]:
+def pl_permutation(scores: List[float], temperature: float, rng: Optional[random.Random] = None) -> List[int]:
     """Generate permutation using Plackett-Luce model with Gumbel trick"""
     if temperature <= 0:
         raise ValueError("temperature must be > 0")
-    noisy = [(i, scores[i] / temperature + gumbel()) for i in range(len(scores))]
+    noisy = [(i, scores[i] / temperature + gumbel(rng)) for i in range(len(scores))]
     noisy.sort(key=lambda t: (-t[1], t[0]))
     return [i for (i, _) in noisy]
+
+
+def _bike_pref_task(i: int) -> List[int]:
+    ctx = _BIKE_POOL_CTX
+    bike = ctx["bikes"][i]
+    scores = compute_bike_preference_scores(
+        bike,
+        ctx["stations"],
+        ctx["station_demand"],
+        ctx["station_coords"],
+        ctx["max_demand"],
+        ctx["alpha"],
+        ctx["beta"],
+        ctx["individual_noise_scale"],
+        dist_cache=ctx["dist_cache"],
+    )
+    row_rng = random.Random(_stable_seed("pl_row_bike", ctx["seed"], i))
+    return pl_permutation(zscore(scores), ctx["temp_x"], rng=row_rng)
+
+
+def _station_pref_task(i: int) -> List[int]:
+    ctx = _BIKE_POOL_CTX
+    station = ctx["stations"][i]
+    scores = compute_station_preference_scores(
+        station,
+        ctx["bikes"],
+        ctx["station_demand"],
+        ctx["station_type_demand"],
+        ctx["station_coords"],
+        ctx["a"],
+        ctx["b"],
+        ctx["individual_noise_scale"],
+        dist_cache=ctx["dist_cache"],
+    )
+    row_rng = random.Random(_stable_seed("pl_row_station", ctx["seed"], i))
+    return pl_permutation(zscore(scores), ctx["temp_y"], rng=row_rng)
 
 def build_preferences(
     bikes: List[BikeState],
@@ -504,6 +570,8 @@ def build_preferences(
     station_coords: Dict[str, Tuple[float, float]],
     temp_x: float,
     temp_y: float,
+    seed: int,
+    workers: int,
     alpha: float = 1.0,
     beta: float = 0.5,
     a: float = 1.0,
@@ -514,39 +582,72 @@ def build_preferences(
     Build preference lists for both sides (optimized for large n).
     Added individual noise to increase rotation count.
     """
-    
+    max_demand = max(station_demand.values()) if station_demand else 1.0
+
+    # Build (bike_id, station) -> distance cache
+    dist_cache: Dict[Tuple[str, str], float] = {}
+    for b_obj in bikes:
+        if b_obj.last_end_lat and b_obj.last_end_lon:
+            for s in stations:
+                if s in station_coords:
+                    dist_cache[(b_obj.bike_id, s)] = haversine_distance(
+                        b_obj.last_end_lat, b_obj.last_end_lon,
+                        station_coords[s][0], station_coords[s][1]
+                    )
+
+    effective_workers = max(1, workers)
+    pool_ctx = {
+        "bikes": bikes,
+        "stations": stations,
+        "station_demand": station_demand,
+        "station_type_demand": station_type_demand,
+        "station_coords": station_coords,
+        "dist_cache": dist_cache,
+        "max_demand": max_demand,
+        "temp_x": temp_x,
+        "temp_y": temp_y,
+        "seed": seed,
+        "alpha": alpha,
+        "beta": beta,
+        "a": a,
+        "b": b,
+        "individual_noise_scale": individual_noise_scale,
+    }
+
     # X side: bikes rank stations
     print(f"  Building X preferences (bikes → stations) for {len(bikes)} bikes...")
-    X_prefs = []
-    batch_size = 1000
-    for batch_start in range(0, len(bikes), batch_size):
-        batch_end = min(batch_start + batch_size, len(bikes))
-        if len(bikes) > 1000:
-            print(f"    Processing bikes {batch_start+1}-{batch_end} of {len(bikes)}...")
-        for i in range(batch_start, batch_end):
-            bike = bikes[i]
-            scores = compute_bike_preference_scores(
-                bike, stations, station_demand, station_coords, alpha, beta, individual_noise_scale
-            )
-            norm_scores = zscore(scores)
-            order = pl_permutation(norm_scores, temp_x)
-            X_prefs.append(order)
-    
+    X_prefs: List[List[int]] = []
+    if effective_workers == 1:
+        _init_bike_pool(pool_ctx)
+        for i in range(len(bikes)):
+            X_prefs.append(_bike_pref_task(i))
+    else:
+        print(f"  Parallel workers: {effective_workers}")
+        try:
+            with mp.Pool(processes=effective_workers, initializer=_init_bike_pool, initargs=(pool_ctx,)) as pool:
+                for pref in pool.imap(_bike_pref_task, range(len(bikes)), chunksize=1):
+                    X_prefs.append(pref)
+        except (PermissionError, OSError) as exc:
+            print(f"  Warning: parallel execution unavailable ({exc}); falling back to single worker.")
+            _init_bike_pool(pool_ctx)
+            X_prefs = [_bike_pref_task(i) for i in range(len(bikes))]
+
     # Y side: stations rank bikes
     print(f"  Building Y preferences (stations → bikes) for {len(stations)} stations...")
-    Y_prefs = []
-    for batch_start in range(0, len(stations), batch_size):
-        batch_end = min(batch_start + batch_size, len(stations))
-        if len(stations) > 1000:
-            print(f"    Processing stations {batch_start+1}-{batch_end} of {len(stations)}...")
-        for i in range(batch_start, batch_end):
-            station = stations[i]
-            scores = compute_station_preference_scores(
-                station, bikes, station_demand, station_type_demand, station_coords, a, b, individual_noise_scale
-            )
-            norm_scores = zscore(scores)
-            order = pl_permutation(norm_scores, temp_y)
-            Y_prefs.append(order)
+    Y_prefs: List[List[int]] = []
+    if effective_workers == 1:
+        _init_bike_pool(pool_ctx)
+        for i in range(len(stations)):
+            Y_prefs.append(_station_pref_task(i))
+    else:
+        try:
+            with mp.Pool(processes=effective_workers, initializer=_init_bike_pool, initargs=(pool_ctx,)) as pool:
+                for pref in pool.imap(_station_pref_task, range(len(stations)), chunksize=1):
+                    Y_prefs.append(pref)
+        except (PermissionError, OSError) as exc:
+            print(f"  Warning: parallel execution unavailable ({exc}); falling back to single worker.")
+            _init_bike_pool(pool_ctx)
+            Y_prefs = [_station_pref_task(i) for i in range(len(stations))]
     
     return X_prefs, Y_prefs
 
@@ -596,6 +697,8 @@ def main():
     parser.add_argument("--b", type=float, default=0.5, help="Weight for distance in station preferences")
     parser.add_argument("--individual-noise", type=float, default=0.4, 
                        help="Scale of individual noise for preference diversity (higher = more rotation)")
+    parser.add_argument("--workers", type=int, default=1,
+                       help="Number of parallel workers for preference building (default: 1; >1 is experimental)")
     
     args = parser.parse_args()
     
@@ -692,7 +795,7 @@ def main():
     print("Building preferences...")
     X_prefs, Y_prefs = build_preferences(
         bikes, selected_stations, station_demand, station_type_demand, station_coords,
-        args.temp_x, args.temp_y,
+        args.temp_x, args.temp_y, args.seed, args.workers,
         args.alpha, args.beta, args.a, args.b,
         args.individual_noise
     )

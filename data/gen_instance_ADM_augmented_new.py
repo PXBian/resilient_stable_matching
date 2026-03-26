@@ -35,8 +35,10 @@ To increase rotation count:
 
 import argparse
 import csv
+import hashlib
 import json
 import math
+import multiprocessing as mp
 import random
 from typing import List, Dict, Tuple, Optional
 import numpy as np
@@ -44,8 +46,37 @@ import numpy as np
 # Import functions from original script
 from gen_instance_ADM import (
     open_csv_reader, normalize_header, find_cols,
-    zscore, gumbel, pl_permutation, verify_complete_no_ties
+    zscore, verify_complete_no_ties
 )
+
+
+_ADM_POOL_CTX = None
+
+
+def _stable_seed(*parts: object) -> int:
+    payload = "||".join(str(p) for p in parts).encode("utf-8")
+    return int.from_bytes(hashlib.blake2b(payload, digest_size=8).digest(), "big")
+
+
+def gumbel(rng: Optional[random.Random] = None) -> float:
+    if rng is None:
+        u = random.random()
+    else:
+        u = rng.random()
+    return -math.log(-math.log(max(u, 1e-12)))
+
+
+def pl_permutation(scores: List[float], temperature: float, rng: Optional[random.Random] = None) -> List[int]:
+    if temperature <= 0:
+        raise ValueError("temperature must be > 0")
+    noisy = [(i, scores[i] / temperature + gumbel(rng)) for i in range(len(scores))]
+    noisy.sort(key=lambda t: (-t[1], t[0]))
+    return [i for (i, _) in noisy]
+
+
+def _init_adm_pool(ctx):
+    global _ADM_POOL_CTX
+    _ADM_POOL_CTX = ctx
 
 # ---------------- Data Augmentation ----------------
 
@@ -82,36 +113,26 @@ def generate_synthetic_scores(
     # Generate synthetic scores
     n_needed = target_count - len(existing_pri_scores)
     if n_needed > 0:
-        # Use bootstrap resampling instead of pure normal distribution
-        # This maintains diversity and prevents score concentration
-        synthetic_pri = []
-        synthetic_acc = []
-        
-        for i in range(n_needed):
-            # Bootstrap: sample from existing data with replacement
-            idx = np.random.randint(0, len(existing_pri_scores))
-            base_pri = existing_pri_scores[idx]
-            base_acc = existing_acc_scores[idx] if idx < len(existing_acc_scores) else acc_mean
-            
-            # Add small random noise to increase diversity (key for rotation count)
-            # Noise scale: 10-20% of std to maintain distribution while adding variety
-            pri_noise = np.random.normal(0, pri_std * 0.15)
-            acc_noise = np.random.normal(0, acc_std * 0.15) if math.isfinite(base_acc) else 0.0
-            
-            synthetic_pri.append(base_pri + pri_noise)
-            
-            # Handle acc_ratio: add noise but keep in reasonable range
-            if math.isfinite(base_acc):
-                synthetic_acc.append(np.clip(base_acc + acc_noise, -1.0, 2.0))
-            else:
-                synthetic_acc.append(base_acc)  # Keep -inf as is
-        
-        # Combine with existing
-        all_pri_scores = list(existing_pri_scores) + synthetic_pri
-        all_acc_scores = list(existing_acc_scores) + synthetic_acc
-        
-        return all_pri_scores, all_acc_scores
-    
+        # Vectorized bootstrap resampling with noise
+        indices = np.random.randint(0, len(existing_pri_scores), size=n_needed)
+        base_pri_arr = np.array(existing_pri_scores)[indices]
+        base_acc_arr = np.array(existing_acc_scores)[indices]
+
+        pri_noise = np.random.normal(0, pri_std * 0.15, size=n_needed)
+        synthetic_pri = (base_pri_arr + pri_noise).tolist()
+
+        # For acc: only add noise where finite; keep -inf as is
+        acc_finite_mask = np.isfinite(base_acc_arr)
+        acc_noise = np.where(acc_finite_mask,
+                             np.random.normal(0, acc_std * 0.15, size=n_needed),
+                             0.0)
+        synthetic_acc_arr = np.where(acc_finite_mask,
+                                     np.clip(base_acc_arr + acc_noise, -1.0, 2.0),
+                                     base_acc_arr)
+        synthetic_acc = synthetic_acc_arr.tolist()
+
+        return list(existing_pri_scores) + synthetic_pri, list(existing_acc_scores) + synthetic_acc
+
     return existing_pri_scores, existing_acc_scores
 
 # ---------------- Enhanced Data Loading ----------------
@@ -264,35 +285,79 @@ def auto_scale_latent_dim(n: int, user_specified: int) -> int:
 
 # ---------------- Optimized Preference Building ----------------
 
+def _x_pref_task(i: int) -> Tuple[str, List[str]]:
+    ctx = _ADM_POOL_CTX
+    x_ids = ctx["x_ids"]
+    y_ids = ctx["y_ids"]
+    scores = np.array(ctx["pri_scores"], dtype=np.float64)
+
+    if ctx["x_factors"] is not None and ctx["y_factors"] is not None:
+        factor_similarity = np.dot(ctx["x_factors"][i], ctx["y_factors"].T)
+        scores += ctx["latent_weight"] * factor_similarity.astype(np.float64)
+
+    if ctx["individual_noise_scale"] > 0:
+        for j in range(ctx["n"]):
+            pair_hash = _stable_seed("pair_noise_x_y", x_ids[i], y_ids[j])
+            pair_rng = random.Random(pair_hash)
+            scores[j] += pair_rng.gauss(0, ctx["individual_noise_scale"])
+
+    scores_norm = zscore(scores.tolist())
+    row_rng = random.Random(_stable_seed("pl_row_x", ctx["seed"], i))
+    order = pl_permutation(scores_norm, ctx["temp_x"], rng=row_rng)
+    return x_ids[i], [y_ids[j] for j in order]
+
+
+def _y_pref_task(j: int) -> Tuple[str, List[str]]:
+    ctx = _ADM_POOL_CTX
+    x_ids = ctx["x_ids"]
+    y_ids = ctx["y_ids"]
+    scores = np.array(ctx["acc_scores"], dtype=np.float64)
+
+    if ctx["x_factors"] is not None and ctx["y_factors"] is not None:
+        factor_similarity = np.dot(ctx["y_factors"][j], ctx["x_factors"].T)
+        scores += ctx["latent_weight"] * factor_similarity.astype(np.float64)
+
+    if ctx["individual_noise_scale"] > 0:
+        for i in range(ctx["n"]):
+            pair_hash = _stable_seed("pair_noise_y_x", y_ids[j], x_ids[i])
+            pair_rng = random.Random(pair_hash)
+            scores[i] += pair_rng.gauss(0, ctx["individual_noise_scale"])
+
+    scores_norm = zscore(scores.tolist())
+    row_rng = random.Random(_stable_seed("pl_row_y", ctx["seed"], j))
+    order = pl_permutation(scores_norm, ctx["temp_y"], rng=row_rng)
+    return y_ids[j], [x_ids[i] for i in order]
+
+
 def build_preferences_individual_optimized(
-    pri_scores: List[float], 
-    acc_scores: List[float], 
-    temp_x: float, 
+    pri_scores: List[float],
+    acc_scores: List[float],
+    temp_x: float,
     temp_y: float,
     individual_noise_scale: float = 0.0,
     latent_dim: int = 0,
     latent_weight: float = 1.0,
-    seed: int = 0
+    seed: int = 0,
+    workers: int = 1,
 ) -> Tuple[List[str], List[str], Dict[str, List[str]], Dict[str, List[str]]]:
     """
     Optimized version with batch processing for large n.
-    
+
     Enhanced with multi-dimensional signals:
     1. Latent factor model: each agent has a unique feature vector
     2. Pair-wise matching scores based on factor similarity
     3. Individual noise for additional diversity
-    
-    This increases signal dimensionality from 1D (priority/accepted_ratio) to 
+
+    This increases signal dimensionality from 1D (priority/accepted_ratio) to
     (1 + latent_dim) dimensions, similar to FOOD/RAP/BIKE.
     """
     random.seed(seed)
     np.random.seed(seed)
-    
+
     n = len(pri_scores)
     x_ids = [f"x{i+1}" for i in range(n)]
     y_ids = [f"y{i+1}" for i in range(n)]
-    
-    # Generate latent factors if enabled (increases dimensionality)
+
     x_factors = None
     y_factors = None
     if latent_dim > 0:
@@ -300,84 +365,63 @@ def build_preferences_individual_optimized(
         x_factors, y_factors = generate_latent_factors(n, latent_dim, seed)
         print(f"  Using latent weight: {latent_weight}")
 
-    # X side: for each intuition, sample a permutation of students
     print(f"Building X preferences (intuition → students) for {n} agents...")
     if individual_noise_scale > 0:
         print(f"  Using individual noise scale: {individual_noise_scale}")
-    x_prefs: Dict[str, List[str]] = {}
-    batch_size = 1000
-    
-    for batch_start in range(0, n, batch_size):
-        batch_end = min(batch_start + batch_size, n)
-        if n > 1000:
-            print(f"  Processing agents {batch_start+1}-{batch_end} of {n}...")
-        for i in range(batch_start, batch_end):
-            x = x_ids[i]
-            
-            # Start with base scores (raw pri_scores) - 1D signal
-            scores = np.array(pri_scores, dtype=np.float64)
-            
-            # Add latent factor matching scores (multi-dimensional signal)
-            # X agent i prefers Y agent j based on factor similarity
-            if x_factors is not None and y_factors is not None:
-                # Compute dot product similarity: x_factors[i] · y_factors[j]
-                factor_similarity = np.dot(x_factors[i], y_factors.T)  # shape: (n,)
-                scores += latent_weight * factor_similarity.astype(np.float64)
-            
-            # Add pair-wise individual noise (KEY for rotation count)
-            # Each x-y pair has unique noise based on their IDs
-            # This is done BEFORE zscore to preserve individual differences
-            if individual_noise_scale > 0:
-                for j in range(n):
-                    # Use hash of (x_id, y_id) for consistent but unique noise
-                    pair_hash = hash((x, y_ids[j])) % (2**31)
-                    pair_rng = random.Random(pair_hash)
-                    scores[j] += pair_rng.gauss(0, individual_noise_scale)
-            
-            # Now normalize the individualized scores
-            scores_norm = zscore(scores.tolist())
-            
-            # Generate permutation with individualized scores
-            order = pl_permutation(scores_norm, temp_x)
-            x_prefs[x] = [y_ids[j] for j in order]
 
-    # Y side: for each student, sample a permutation of intuitions
+    effective_workers = max(1, workers)
+    pool_ctx = {
+        "pri_scores": pri_scores,
+        "acc_scores": acc_scores,
+        "x_ids": x_ids,
+        "y_ids": y_ids,
+        "x_factors": x_factors,
+        "y_factors": y_factors,
+        "latent_weight": latent_weight,
+        "individual_noise_scale": individual_noise_scale,
+        "temp_x": temp_x,
+        "temp_y": temp_y,
+        "seed": seed,
+        "n": n,
+    }
+
+    x_prefs: Dict[str, List[str]] = {}
+    if effective_workers == 1:
+        _init_adm_pool(pool_ctx)
+        for i in range(n):
+            key, pref = _x_pref_task(i)
+            x_prefs[key] = pref
+    else:
+        print(f"  Parallel workers: {effective_workers}")
+        try:
+            with mp.Pool(processes=effective_workers, initializer=_init_adm_pool, initargs=(pool_ctx,)) as pool:
+                for key, pref in pool.imap(_x_pref_task, range(n), chunksize=1):
+                    x_prefs[key] = pref
+        except (PermissionError, OSError) as exc:
+            print(f"  Warning: parallel execution unavailable ({exc}); falling back to single worker.")
+            _init_adm_pool(pool_ctx)
+            for i in range(n):
+                key, pref = _x_pref_task(i)
+                x_prefs[key] = pref
+
     print(f"Building Y preferences (students → intuition) for {n} agents...")
     y_prefs: Dict[str, List[str]] = {}
-    
-    for batch_start in range(0, n, batch_size):
-        batch_end = min(batch_start + batch_size, n)
-        if n > 1000:
-            print(f"  Processing agents {batch_start+1}-{batch_end} of {n}...")
-        for j in range(batch_start, batch_end):
-            y = y_ids[j]
-            
-            # Start with base scores (raw acc_scores) - 1D signal
-            scores = np.array(acc_scores, dtype=np.float64)
-            
-            # Add latent factor matching scores (multi-dimensional signal)
-            # Y agent j prefers X agent i based on factor similarity
-            if x_factors is not None and y_factors is not None:
-                # Compute dot product similarity: y_factors[j] · x_factors[i]
-                factor_similarity = np.dot(y_factors[j], x_factors.T)  # shape: (n,)
-                scores += latent_weight * factor_similarity.astype(np.float64)
-            
-            # Add pair-wise individual noise (KEY for rotation count)
-            # Each y-x pair has unique noise based on their IDs
-            # This is done BEFORE zscore to preserve individual differences
-            if individual_noise_scale > 0:
-                for i in range(n):
-                    # Use hash of (y_id, x_id) for consistent but unique noise
-                    pair_hash = hash((y, x_ids[i])) % (2**31)
-                    pair_rng = random.Random(pair_hash)
-                    scores[i] += pair_rng.gauss(0, individual_noise_scale)
-            
-            # Now normalize the individualized scores
-            scores_norm = zscore(scores.tolist())
-            
-            # Generate permutation with individualized scores
-            order = pl_permutation(scores_norm, temp_y)
-            y_prefs[y] = [x_ids[i] for i in order]
+    if effective_workers == 1:
+        _init_adm_pool(pool_ctx)
+        for j in range(n):
+            key, pref = _y_pref_task(j)
+            y_prefs[key] = pref
+    else:
+        try:
+            with mp.Pool(processes=effective_workers, initializer=_init_adm_pool, initargs=(pool_ctx,)) as pool:
+                for key, pref in pool.imap(_y_pref_task, range(n), chunksize=1):
+                    y_prefs[key] = pref
+        except (PermissionError, OSError) as exc:
+            print(f"  Warning: parallel execution unavailable ({exc}); falling back to single worker.")
+            _init_adm_pool(pool_ctx)
+            for j in range(n):
+                key, pref = _y_pref_task(j)
+                y_prefs[key] = pref
 
     return x_ids, y_ids, x_prefs, y_prefs
 
@@ -402,6 +446,8 @@ def main():
     ap.add_argument("--out-txt", required=True, help="Output text file (required)")
     ap.add_argument("--augment", type=lambda x: x.lower() in ['true', '1', 'yes'], default=True,
                     help="Enable data augmentation for large n (default: True)")
+    ap.add_argument("--workers", type=int, default=1,
+                    help="Number of parallel workers for preference building (default: 1; >1 is experimental)")
     args = ap.parse_args()
 
     random.seed(args.seed)
@@ -427,7 +473,8 @@ def main():
         individual_noise_scale=args.individual_noise,
         latent_dim=effective_latent_dim,
         latent_weight=args.latent_weight,
-        seed=args.seed
+        seed=args.seed,
+        workers=args.workers,
     )
     
     check = verify_complete_no_ties(x_prefs_ids, y_prefs_ids, x_ids, y_ids)
@@ -458,11 +505,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
 
 
 
