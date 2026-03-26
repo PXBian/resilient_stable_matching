@@ -38,12 +38,15 @@ python3 gen_instance_TAXI_new.py \
 
 import argparse
 import csv
+import hashlib
 import math
+import multiprocessing as mp
 import random
 from typing import List, Dict, Tuple, Optional
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
+import pandas as pd
 
 try:
     import geopandas as gpd
@@ -52,6 +55,19 @@ try:
 except ImportError:
     HAS_GEO = False
     np = None
+
+
+_TAXI_POOL_CTX = None
+
+
+def _stable_seed(*parts: object) -> int:
+    payload = "||".join(str(p) for p in parts).encode("utf-8")
+    return int.from_bytes(hashlib.blake2b(payload, digest_size=8).digest(), "big")
+
+
+def _init_taxi_pool(ctx):
+    global _TAXI_POOL_CTX
+    _TAXI_POOL_CTX = ctx
 
 # ==================== Data Structures ====================
 
@@ -152,91 +168,66 @@ def load_taxi_data(
 ) -> Tuple[List[Driver], List[Order]]:
     """
     Load drivers and orders from TAXI_raw.csv
-    
+
     Drivers: based on dropoff locations (DOLocationID)
     Orders: based on pickup locations (PULocationID)
     """
-    drivers = []
-    orders = []
-    driver_stats = defaultdict(lambda: {'fare_sum': 0.0, 'trip_count': 0})
-    
-    with open(csv_path, newline="", encoding="utf-8") as f:
-        reader = csv.reader(f)
-        header = next(reader)
-        cols = {name.strip().lower(): idx for idx, name in enumerate(header)}
-        
-        # Required columns
-        required = ["total_amount", "fare_amount", "pulocationid", "dolocationid", 
-                   "trip_distance", "tpep_pickup_datetime"]
-        missing = [r for r in required if r not in cols]
-        if missing:
-            raise ValueError(f"Missing required columns: {missing}. Found: {list(cols.keys())[:20]}...")
-        
-        it = cols["total_amount"]
-        ifa = cols["fare_amount"]
-        ipu = cols["pulocationid"]
-        ido = cols["dolocationid"]
-        idist = cols["trip_distance"]
-        ipick = cols["tpep_pickup_datetime"]
-        
-        # Optional columns
-        itip = cols.get("tip_amount")
-        
-        for row in reader:
-            try:
-                total = float(row[it])
-                fare = float(row[ifa])
-                dist = float(row[idist])
-            except (ValueError, IndexError):
-                continue
-            
-            if not (math.isfinite(total) and math.isfinite(fare) and 
-                    math.isfinite(dist) and dist >= 0):
-                continue
-            
-            # Parse locations
-            try:
-                pu_loc = int(float(row[ipu])) if ipu < len(row) and row[ipu].strip() else None
-                do_loc = int(float(row[ido])) if ido < len(row) and row[ido].strip() else None
-            except (ValueError, IndexError):
-                pu_loc = do_loc = None
-            
-            if pu_loc is None or do_loc is None:
-                continue
-            
-            # Parse time (extract hour)
-            hour = 0
-            if ipick < len(row):
-                try:
-                    time_str = row[ipick]
-                    if ' ' in time_str:
-                        hour = int(time_str.split()[1].split(':')[0])
-                except (ValueError, IndexError):
-                    pass
-            
-            # Track driver statistics (by dropoff location as proxy for driver)
-            driver_key = do_loc
-            driver_stats[driver_key]['fare_sum'] += fare
-            driver_stats[driver_key]['trip_count'] += 1
-            
-            # Create order
-            orders.append(Order(
-                order_id=f"order_{len(orders)}",
-                pickup_loc=pu_loc,
-                total_amount=total,
-                trip_distance=dist,
-                hour=hour
-            ))
-    
-    # Create drivers from statistics
-    for loc, stats in driver_stats.items():
-        fare_avg = stats['fare_sum'] / stats['trip_count'] if stats['trip_count'] > 0 else 0.0
-        drivers.append(Driver(
-            driver_id=f"driver_{loc}",
-            location=loc,
-            fare_avg=fare_avg,
-            trip_count=stats['trip_count']
-        ))
+    required = ["total_amount", "fare_amount", "pulocationid", "dolocationid",
+                "trip_distance", "tpep_pickup_datetime"]
+
+    # Peek at header to detect optional columns, then load only needed columns
+    df_header = pd.read_csv(csv_path, nrows=0)
+    df_header.columns = df_header.columns.str.strip().str.lower()
+    usecols = required.copy()
+    if "tip_amount" in df_header.columns:
+        usecols.append("tip_amount")
+
+    missing = [r for r in required if r not in df_header.columns]
+    if missing:
+        raise ValueError(f"Missing required columns: {missing}. Found: {list(df_header.columns)[:20]}...")
+
+    df = pd.read_csv(csv_path, usecols=lambda c: c.strip().lower() in usecols)
+    df.columns = df.columns.str.strip().str.lower()
+
+    # Clean and filter vectorially
+    for col in ["total_amount", "fare_amount", "trip_distance", "pulocationid", "dolocationid"]:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    df.replace([float('inf'), float('-inf')], float('nan'), inplace=True)
+    df.dropna(subset=["total_amount", "fare_amount", "trip_distance",
+                      "pulocationid", "dolocationid"], inplace=True)
+    df = df[df["trip_distance"] >= 0]
+    df["pulocationid"] = df["pulocationid"].astype(int)
+    df["dolocationid"] = df["dolocationid"].astype(int)
+
+    # Parse hour vectorially
+    df["hour"] = pd.to_datetime(df["tpep_pickup_datetime"], errors='coerce').dt.hour.fillna(0).astype(int)
+
+    # Build driver statistics (by dropoff location as proxy for driver)
+    drv_stats = df.groupby("dolocationid").agg(
+        fare_sum=("fare_amount", "sum"),
+        trip_count=("fare_amount", "count")
+    ).reset_index()
+
+    drivers = [
+        Driver(
+            driver_id=f"driver_{int(row.dolocationid)}",
+            location=int(row.dolocationid),
+            fare_avg=row.fare_sum / row.trip_count if row.trip_count > 0 else 0.0,
+            trip_count=int(row.trip_count),
+        )
+        for row in drv_stats.itertuples(index=False)
+    ]
+
+    orders = [
+        Order(
+            order_id=f"order_{i}",
+            pickup_loc=int(row.pulocationid),
+            total_amount=float(row.total_amount),
+            trip_distance=float(row.trip_distance),
+            hour=int(row.hour),
+        )
+        for i, row in enumerate(df.itertuples(index=False))
+    ]
     
     # Augment drivers if needed (orders are already plentiful)
     if len(drivers) < n:
@@ -358,102 +349,84 @@ def compute_driver_preference_scores(
     driver: Driver,
     orders: List[Order],
     zone_centroids: Optional[Dict[int, Tuple[float, float]]],
+    norm_order_amounts: List[float],
     alpha: float = 1.0,  # Weight for revenue
     beta: float = 0.5,   # Weight for distance
-    individual_noise_scale: float = 0.4
+    individual_noise_scale: float = 0.4,
+    dist_cache: Optional[Dict[Tuple[int, int], float]] = None,
 ) -> List[float]:
     """
     Compute preference scores for a driver over all orders.
     Score_driver→order = α·Revenue(order) - β·Distance(driver_loc, pickup_loc) + IndividualNoise
-    
+
     Drivers prioritize revenue but also consider distance (moderate preference).
     Individual noise increases diversity and rotation count.
     """
     scores = []
-    
-    # Normalize order amounts
-    all_amounts = [o.total_amount for o in orders]
-    max_amount = max(all_amounts) if all_amounts else 1.0
-    min_amount = min(all_amounts) if all_amounts else 0.0
-    amount_range = max_amount - min_amount if max_amount > min_amount else 1.0
-    
-    # Generate driver-specific random seed for consistent individual noise
-    driver_hash = hash(driver.driver_id) % (2**31)
-    
-    for order in orders:
+
+    for order, norm_amount in zip(orders, norm_order_amounts):
         # Revenue component (primary factor)
-        norm_amount = (order.total_amount - min_amount) / amount_range if amount_range > 0 else 0.0
         revenue_score = alpha * norm_amount
-        
-        # Distance component (secondary factor)
-        pickup_dist_km = compute_location_distance(driver.location, order.pickup_loc, zone_centroids)
-        # Normalize distance (assume max ~50km in city)
+
+        # Distance component (secondary factor) — use cache if available
+        if dist_cache is not None:
+            pickup_dist_km = dist_cache.get((driver.location, order.pickup_loc),
+                                            compute_location_distance(driver.location, order.pickup_loc, zone_centroids))
+        else:
+            pickup_dist_km = compute_location_distance(driver.location, order.pickup_loc, zone_centroids)
         norm_dist = min(pickup_dist_km / 50.0, 1.0)
         distance_cost = beta * norm_dist
-        
-        # Base score
+
         base_score = revenue_score - distance_cost
-        
+
         # Pair-wise individual noise (KEY for rotation count)
-        # Each driver-order pair has unique noise, creating fully pair-specific score matrix
-        pair_hash = hash((driver.driver_id, order.order_id)) % (2**31)
+        pair_hash = _stable_seed("pair_noise_driver_order", driver.driver_id, order.order_id)
         pair_rng = random.Random(pair_hash)
         pair_noise = pair_rng.gauss(0, individual_noise_scale)
-        
-        score = base_score + pair_noise
-        scores.append(score)
-    
+
+        scores.append(base_score + pair_noise)
+
     return scores
 
 def compute_order_preference_scores(
     order: Order,
     drivers: List[Driver],
     zone_centroids: Optional[Dict[int, Tuple[float, float]]],
+    norm_driver_qualities: List[float],
     a: float = 1.0,      # Weight for distance (primary for orders)
-    b: float = 0.3,     # Weight for driver quality
-    individual_noise_scale: float = 0.4
+    b: float = 0.3,      # Weight for driver quality
+    individual_noise_scale: float = 0.4,
+    dist_cache: Optional[Dict[Tuple[int, int], float]] = None,
 ) -> List[float]:
     """
     Compute preference scores for an order over all drivers.
     Score_order→driver = -a·Distance(driver_loc, pickup_loc) + b·DriverQuality + IndividualNoise
-    
+
     Orders prioritize proximity (want quick pickup) but also consider driver quality.
     Individual noise increases diversity and rotation count.
     """
     scores = []
-    
-    # Normalize driver quality (based on fare_avg as proxy)
-    all_fares = [d.fare_avg for d in drivers]
-    max_fare = max(all_fares) if all_fares else 1.0
-    min_fare = min(all_fares) if all_fares else 0.0
-    fare_range = max_fare - min_fare if max_fare > min_fare else 1.0
-    
-    # Generate order-specific random seed for consistent individual noise
-    order_hash = hash(order.order_id) % (2**31)
-    
-    for driver in drivers:
-        # Distance component (primary factor - orders want nearby drivers)
-        pickup_dist_km = compute_location_distance(driver.location, order.pickup_loc, zone_centroids)
-        # Normalize distance (assume max ~50km in city)
+
+    for driver, norm_quality in zip(drivers, norm_driver_qualities):
+        # Distance component — use cache if available
+        if dist_cache is not None:
+            pickup_dist_km = dist_cache.get((driver.location, order.pickup_loc),
+                                            compute_location_distance(driver.location, order.pickup_loc, zone_centroids))
+        else:
+            pickup_dist_km = compute_location_distance(driver.location, order.pickup_loc, zone_centroids)
         norm_dist = min(pickup_dist_km / 50.0, 1.0)
-        distance_cost = a * norm_dist  # Negative preference for distance
-        
-        # Driver quality component (secondary factor)
-        norm_quality = (driver.fare_avg - min_fare) / fare_range if fare_range > 0 else 0.0
+        distance_cost = a * norm_dist
+
         quality_score = b * norm_quality
-        
-        # Base score (negative distance means prefer closer)
+
         base_score = -distance_cost + quality_score
-        
-        # Pair-wise individual noise (KEY for rotation count)
-        # Each order-driver pair has unique noise, creating fully pair-specific score matrix
-        pair_hash = hash((order.order_id, driver.driver_id)) % (2**31)
+
+        pair_hash = _stable_seed("pair_noise_order_driver", order.order_id, driver.driver_id)
         pair_rng = random.Random(pair_hash)
         pair_noise = pair_rng.gauss(0, individual_noise_scale)
-        
-        score = base_score + pair_noise
-        scores.append(score)
-    
+
+        scores.append(base_score + pair_noise)
+
     return scores
 
 # ==================== Preference List Generation ====================
@@ -474,18 +447,55 @@ def zscore(xs: List[float]) -> List[float]:
     
     return [nz(x) for x in xs]
 
-def gumbel() -> float:
+def gumbel(rng: Optional[random.Random] = None) -> float:
     """Sample from standard Gumbel distribution"""
-    u = random.random()
+    if rng is None:
+        u = random.random()
+    else:
+        u = rng.random()
     return -math.log(-math.log(max(u, 1e-12)))
 
-def pl_permutation(scores: List[float], temperature: float) -> List[int]:
+def pl_permutation(scores: List[float], temperature: float, rng: Optional[random.Random] = None) -> List[int]:
     """Generate permutation using Plackett-Luce model with Gumbel trick"""
     if temperature <= 0:
         raise ValueError("temperature must be > 0")
-    noisy = [(i, scores[i] / temperature + gumbel()) for i in range(len(scores))]
+    noisy = [(i, scores[i] / temperature + gumbel(rng)) for i in range(len(scores))]
     noisy.sort(key=lambda t: (-t[1], t[0]))
     return [i for (i, _) in noisy]
+
+
+def _driver_pref_task(i: int) -> List[int]:
+    ctx = _TAXI_POOL_CTX
+    driver = ctx["drivers"][i]
+    scores = compute_driver_preference_scores(
+        driver,
+        ctx["orders"],
+        ctx["zone_centroids"],
+        ctx["norm_order_amounts"],
+        ctx["alpha"],
+        ctx["beta"],
+        ctx["individual_noise_scale"],
+        dist_cache=ctx["dist_cache"],
+    )
+    row_rng = random.Random(_stable_seed("pl_row_driver", ctx["seed"], i))
+    return pl_permutation(zscore(scores), ctx["temp_x"], rng=row_rng)
+
+
+def _order_pref_task(i: int) -> List[int]:
+    ctx = _TAXI_POOL_CTX
+    order_obj = ctx["orders"][i]
+    scores = compute_order_preference_scores(
+        order_obj,
+        ctx["drivers"],
+        ctx["zone_centroids"],
+        ctx["norm_driver_qualities"],
+        ctx["a"],
+        ctx["b"],
+        ctx["individual_noise_scale"],
+        dist_cache=ctx["dist_cache"],
+    )
+    row_rng = random.Random(_stable_seed("pl_row_order", ctx["seed"], i))
+    return pl_permutation(zscore(scores), ctx["temp_y"], rng=row_rng)
 
 def build_preferences(
     drivers: List[Driver],
@@ -493,6 +503,8 @@ def build_preferences(
     zone_centroids: Optional[Dict[int, Tuple[float, float]]],
     temp_x: float,
     temp_y: float,
+    seed: int,
+    workers: int,
     alpha: float = 1.0,
     beta: float = 0.5,
     a: float = 1.0,
@@ -504,39 +516,84 @@ def build_preferences(
     Uses Plackett-Luce sampling with Gumbel trick for diversity.
     """
     n = len(drivers)
-    
+
+    # Precompute normalization constants once.
+    all_amounts = [o.total_amount for o in orders]
+    max_amount = max(all_amounts) if all_amounts else 1.0
+    min_amount = min(all_amounts) if all_amounts else 0.0
+    amount_range = max_amount - min_amount if max_amount > min_amount else 1.0
+    norm_order_amounts = [
+        (o.total_amount - min_amount) / amount_range if amount_range > 0 else 0.0 for o in orders
+    ]
+    all_fares = [d.fare_avg for d in drivers]
+    max_fare = max(all_fares) if all_fares else 1.0
+    min_fare = min(all_fares) if all_fares else 0.0
+    fare_range = max_fare - min_fare if max_fare > min_fare else 1.0
+    norm_driver_qualities = [
+        (d.fare_avg - min_fare) / fare_range if fare_range > 0 else 0.0 for d in drivers
+    ]
+
+    # Precompute all unique (driver_loc, order_pickup_loc) distances once.
+    # Many drivers share the same DOLocationID, so this avoids O(n²) haversine calls.
+    unique_driver_locs = {d.location for d in drivers}
+    unique_order_locs  = {o.pickup_loc for o in orders}
+    dist_cache: Dict[Tuple[int, int], float] = {}
+    for dl in unique_driver_locs:
+        for ol in unique_order_locs:
+            dist_cache[(dl, ol)] = compute_location_distance(dl, ol, zone_centroids)
+
+    effective_workers = max(1, workers)
+    pool_ctx = {
+        "drivers": drivers,
+        "orders": orders,
+        "zone_centroids": zone_centroids,
+        "norm_order_amounts": norm_order_amounts,
+        "norm_driver_qualities": norm_driver_qualities,
+        "dist_cache": dist_cache,
+        "temp_x": temp_x,
+        "temp_y": temp_y,
+        "seed": seed,
+        "alpha": alpha,
+        "beta": beta,
+        "a": a,
+        "b": b,
+        "individual_noise_scale": individual_noise_scale,
+    }
+
     # X side: drivers rank orders
     print(f"  Building X preferences (drivers → orders) for {n} drivers...")
-    X_prefs = []
-    batch_size = 1000
-    for batch_start in range(0, n, batch_size):
-        batch_end = min(batch_start + batch_size, n)
-        if n > 1000:
-            print(f"    Processing drivers {batch_start+1}-{batch_end} of {n}...")
-        for i in range(batch_start, batch_end):
-            driver = drivers[i]
-            scores = compute_driver_preference_scores(
-                driver, orders, zone_centroids, alpha, beta, individual_noise_scale
-            )
-            norm_scores = zscore(scores)
-            order = pl_permutation(norm_scores, temp_x)
-            X_prefs.append(order)
-    
+    X_prefs: List[List[int]] = []
+    if effective_workers == 1:
+        _init_taxi_pool(pool_ctx)
+        for i in range(n):
+            X_prefs.append(_driver_pref_task(i))
+    else:
+        print(f"  Parallel workers: {effective_workers}")
+        try:
+            with mp.Pool(processes=effective_workers, initializer=_init_taxi_pool, initargs=(pool_ctx,)) as pool:
+                for pref in pool.imap(_driver_pref_task, range(n), chunksize=1):
+                    X_prefs.append(pref)
+        except (PermissionError, OSError) as exc:
+            print(f"  Warning: parallel execution unavailable ({exc}); falling back to single worker.")
+            _init_taxi_pool(pool_ctx)
+            X_prefs = [_driver_pref_task(i) for i in range(n)]
+
     # Y side: orders rank drivers
     print(f"  Building Y preferences (orders → drivers) for {n} orders...")
-    Y_prefs = []
-    for batch_start in range(0, n, batch_size):
-        batch_end = min(batch_start + batch_size, n)
-        if n > 1000:
-            print(f"    Processing orders {batch_start+1}-{batch_end} of {n}...")
-        for i in range(batch_start, batch_end):
-            order = orders[i]
-            scores = compute_order_preference_scores(
-                order, drivers, zone_centroids, a, b, individual_noise_scale
-            )
-            norm_scores = zscore(scores)
-            order = pl_permutation(norm_scores, temp_y)
-            Y_prefs.append(order)
+    Y_prefs: List[List[int]] = []
+    if effective_workers == 1:
+        _init_taxi_pool(pool_ctx)
+        for i in range(n):
+            Y_prefs.append(_order_pref_task(i))
+    else:
+        try:
+            with mp.Pool(processes=effective_workers, initializer=_init_taxi_pool, initargs=(pool_ctx,)) as pool:
+                for pref in pool.imap(_order_pref_task, range(n), chunksize=1):
+                    Y_prefs.append(pref)
+        except (PermissionError, OSError) as exc:
+            print(f"  Warning: parallel execution unavailable ({exc}); falling back to single worker.")
+            _init_taxi_pool(pool_ctx)
+            Y_prefs = [_order_pref_task(i) for i in range(n)]
     
     return X_prefs, Y_prefs
 
@@ -592,6 +649,8 @@ def main():
                        help="Scale of individual noise for preference diversity (higher = more rotation)")
     parser.add_argument("--augment", type=lambda x: x.lower() in ['true', '1', 'yes'], default=True,
                        help="Enable driver augmentation for large n (default: True)")
+    parser.add_argument("--workers", type=int, default=1,
+                       help="Number of parallel workers for preference building (default: 1; >1 is experimental)")
     
     args = parser.parse_args()
     
@@ -613,7 +672,7 @@ def main():
     print("Building preferences...")
     X_prefs, Y_prefs = build_preferences(
         drivers, orders, zone_centroids,
-        args.temp_x, args.temp_y,
+        args.temp_x, args.temp_y, args.seed, args.workers,
         args.alpha, args.beta, args.a, args.b,
         args.individual_noise
     )
@@ -638,4 +697,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

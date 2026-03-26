@@ -208,6 +208,23 @@ def gumbel_sort(ids: List[str], base_scores: Dict[str, float], temperature: floa
     noisy.sort()
     return [x for _, x in noisy]
 
+
+def gumbel_sort_partition(high_ids: List[str], low_ids: List[str], temperature: float) -> List[str]:
+    """
+    Sort a binary-score candidate set without materializing a full base-score dict.
+    `high_ids` get base score 1.0, `low_ids` get base score 0.0.
+    """
+    if temperature <= 0:
+        raise ValueError("temperature must be > 0")
+    noisy = []
+    invT = 1.0 / temperature
+    for x in high_ids:
+        noisy.append((-(1.0 * invT + gumbel()), x))
+    for x in low_ids:
+        noisy.append((-(0.0 + gumbel()), x))
+    noisy.sort()
+    return [x for _, x in noisy]
+
 def verify_complete_no_ties(X_prefs, Y_prefs, paper_ids, reviewers):
     def is_complete(pref_dict, universe):
         S = set(universe)
@@ -466,6 +483,32 @@ def build_preferences_optimized(
     Optimized version with batch processing for large n.
     """
     reviewer_topic = {r: reviewer_modal_topic(author_topics_by_id[r]) for r in reviewers}
+    paper_topic = {pid: papers[pid]["topic"] for pid in paper_ids}
+    paper_topics = sorted({paper_topic[pid] for pid in paper_ids})
+    reviewer_topics = sorted({reviewer_topic[r] for r in reviewers})
+
+    reviewers_by_topic: Dict[str, List[str]] = {topic: [] for topic in paper_topics}
+    for r in reviewers:
+        rtopic = reviewer_topic[r]
+        if rtopic in reviewers_by_topic:
+            reviewers_by_topic[rtopic].append(r)
+    reviewers_other_topic = {
+        topic: [r for r in reviewers if reviewer_topic[r] != topic] for topic in paper_topics
+    }
+
+    papers_by_topic: Dict[str, List[str]] = {topic: [] for topic in reviewer_topics}
+    for pid in paper_ids:
+        ptopic = paper_topic[pid]
+        if ptopic in papers_by_topic:
+            papers_by_topic[ptopic].append(pid)
+    papers_other_topic = {
+        topic: [pid for pid in paper_ids if paper_topic[pid] != topic] for topic in reviewer_topics
+    }
+
+    reviewer_coi_pairs: Dict[str, Set[str]] = defaultdict(set)
+    for pid, reviewer_set in coi_pairs.items():
+        for rid in reviewer_set:
+            reviewer_coi_pairs[rid].add(pid)
     
     # X: papers rank reviewers
     print(f"Building X preferences (papers → reviewers) for {len(paper_ids)} papers...")
@@ -479,17 +522,19 @@ def build_preferences_optimized(
         
         for i in range(batch_start, batch_end):
             pid = paper_ids[i]
-            ptopic = papers[pid]["topic"]
+            ptopic = paper_topic[pid]
             coi_set = coi_pairs.get(pid, set())
-            
-            no_coi = [r for r in reviewers if r not in coi_set]
-            coi = [r for r in reviewers if r in coi_set]
-            
-            base_no_coi = {r: 1.0 if reviewer_topic[r] == ptopic else 0.0 for r in no_coi}
-            base_coi = {r: 1.0 if reviewer_topic[r] == ptopic else 0.0 for r in coi}
-            
-            ord_no_coi = gumbel_sort(no_coi, base_no_coi, temp_x)
-            ord_coi = gumbel_sort(coi, base_coi, temp_x)
+
+            topic_reviewers = reviewers_by_topic.get(ptopic, [])
+            other_reviewers = reviewers_other_topic.get(ptopic, reviewers)
+
+            no_coi_match = [r for r in topic_reviewers if r not in coi_set]
+            no_coi_other = [r for r in other_reviewers if r not in coi_set]
+            coi_match = [r for r in topic_reviewers if r in coi_set]
+            coi_other = [r for r in other_reviewers if r in coi_set]
+
+            ord_no_coi = gumbel_sort_partition(no_coi_match, no_coi_other, temp_x)
+            ord_coi = gumbel_sort_partition(coi_match, coi_other, temp_x)
             
             X_prefs[pid] = ord_no_coi + ord_coi
     
@@ -505,15 +550,18 @@ def build_preferences_optimized(
         for i in range(batch_start, batch_end):
             r = reviewers[i]
             rtopic = reviewer_topic[r]
-            
-            no_coi = [pid for pid in paper_ids if r not in coi_pairs.get(pid, set())]
-            coi = [pid for pid in paper_ids if r in coi_pairs.get(pid, set())]
-            
-            base_no_coi = {pid: 1.0 if papers[pid]["topic"] == rtopic else 0.0 for pid in no_coi}
-            base_coi = {pid: 1.0 if papers[pid]["topic"] == rtopic else 0.0 for pid in coi}
-            
-            ord_no_coi = gumbel_sort(no_coi, base_no_coi, temp_y)
-            ord_coi = gumbel_sort(coi, base_coi, temp_y)
+
+            reviewer_coi = reviewer_coi_pairs.get(r, set())
+            topic_papers = papers_by_topic.get(rtopic, [])
+            other_papers = papers_other_topic.get(rtopic, paper_ids)
+
+            no_coi_match = [pid for pid in topic_papers if pid not in reviewer_coi]
+            no_coi_other = [pid for pid in other_papers if pid not in reviewer_coi]
+            coi_match = [pid for pid in topic_papers if pid in reviewer_coi]
+            coi_other = [pid for pid in other_papers if pid in reviewer_coi]
+
+            ord_no_coi = gumbel_sort_partition(no_coi_match, no_coi_other, temp_y)
+            ord_coi = gumbel_sort_partition(coi_match, coi_other, temp_y)
             
             Y_prefs[r] = ord_no_coi + ord_coi
     
@@ -606,4 +654,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
