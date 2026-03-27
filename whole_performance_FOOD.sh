@@ -84,7 +84,7 @@ declare -a test_cases=(
 # 定义方法数组
 declare -a methods=(
     "capacity_scaling"
-    "heuristic"
+    # "heuristic"
     "network_simplex"
     "ssp_dijkstra"
     # "cost_scaling"

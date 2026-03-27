@@ -7,7 +7,7 @@
 #include <chrono>
 #include <fstream>
 #include <bits/stdc++.h>
-#include "rotations_poset/rotations_poset.h"
+#include "rotation_poset/rotation_poset.h"
 
 using namespace std;
 
@@ -17,8 +17,8 @@ int main(int argv, char** argc) {
     int flowAmount = stoi(argc[3]);
 
     // 使用一维数组存储，按行展开
-    size_t* arr_m = new size_t[n * n];
-    size_t* arr_w = new size_t[n * n];
+    int* arr_m = new int[n * n];
+    int* arr_w = new int[n * n];
     for (size_t i = 0; i < n * n; ++i) {
         arr_m[i] = 0;
         arr_w[i] = 0;
@@ -61,8 +61,10 @@ int main(int argv, char** argc) {
     auto poset_start = chrono::high_resolution_clock::now();
 
     // Construct the rotation poset
-    CPreferenceProfile pr = (CPreferenceProfile){ .men = arr_m, .women = arr_w, .len = n };
-    CRotationPoset rotation_poset = get_rotation_poset(&pr);
+    invert_matrix(arr_w, n);
+    RankingListMatrix men_matrix = { .data = arr_m, .n = n };
+    PositionMapMatrix women_matrix = { .data = arr_w, .n = n };
+    RotationDigraph rotation_poset = get_rotation_digraph(men_matrix, women_matrix);
 
     auto poset_end = chrono::high_resolution_clock::now();
     double poset_time = chrono::duration<double>(poset_end - poset_start).count();
@@ -73,51 +75,44 @@ int main(int argv, char** argc) {
     // Run heuristic algorithm before freeing rotation_poset
     auto heuristic_start = chrono::high_resolution_clock::now();
 
-    // Step 1: For each man, collect all rotations he is involved in (only stable edges, gen_is_stable == 1)
-    vector<set<size_t>> man_rotations(n);  // man_rotations[i] = set of rotation indices for man i
-    
-    CDependency* deps = rotation_poset.data;
+    // Step 1: For each rotation, accumulate stable out-capacity.
+    // NOTE: the new API does not expose per-generator (per-man) info;
+    // per-rotation stable capacity is used as a proxy instead.
+    size_t n_rot = rotation_poset.n_rotations;
+    vector<size_t> rotation_capacity(n_rot, 0);
+
+    Dependency* deps = rotation_poset.data;
     for (size_t i = 0; i < rotation_poset.len; ++i) {
-        CDependency dependency = deps[i];
-        
-        // Only count stable edges (gen_is_stable == 1)
-        if (dependency.gen_is_stable == 1) {
-            size_t man = dependency.generator.man;
-            
-            // Add the rotation index (from) to this man's rotation set
-            man_rotations[man].insert(dependency.from);
+        Dependency dep = deps[i];
+        if (dep.capacity > 0) {
+            rotation_capacity[dep.from] += dep.capacity;
         }
     }
 
-    // Step 2: Create a list of (man_index, rotation_count) pairs and sort by rotation count
-    vector<pair<size_t, size_t>> man_rotation_counts;
-    for (size_t man = 0; man < n; ++man) {
-        man_rotation_counts.push_back({man, man_rotations[man].size()});
+    // Step 2: Collect only rotations with stable out-capacity > 0, then sort ascending
+    vector<size_t> nonzero_caps;
+    for (size_t r = 0; r < n_rot; ++r) {
+        if (rotation_capacity[r] > 0) {
+            nonzero_caps.push_back(rotation_capacity[r]);
+        }
     }
-    
-    // Sort by rotation count (ascending)
-    sort(man_rotation_counts.begin(), man_rotation_counts.end(), 
-         [](const pair<size_t, size_t>& a, const pair<size_t, size_t>& b) {
-             return a.second < b.second;
-         });
+    sort(nonzero_caps.begin(), nonzero_caps.end());
 
-    // Step 3: Find flowAmount men with shortest rotation lists and sum their edges
+    // Step 3: Sum the flowAmount smallest nonzero capacities as heuristic cost
     int heuristic_cost = 0;
-    int selected_count = min(flowAmount, (int)n);
-    
+    int selected_count = min(flowAmount, (int)nonzero_caps.size());
+
     for (int i = 0; i < selected_count; ++i) {
-        size_t rotation_count = man_rotation_counts[i].second;
-        // Number of edges = list_length
-        heuristic_cost += rotation_count;
+        heuristic_cost += nonzero_caps[i];
     }
 
     auto heuristic_end = chrono::high_resolution_clock::now();
     double heuristic_run_time = chrono::duration<double>(heuristic_end - heuristic_start).count();
 
-    size_t n_rotations = rotation_poset.n_rotations;
+    size_t n_rotations = n_rot;
     size_t arc_num = rotation_poset.len;
     // 现在可以安全地释放 rotation_poset
-    free_c_rotation_poset(rotation_poset);
+    free_rotation_digraph(rotation_poset);
     
     // 提前释放输入数组，减少内存占用
     delete[] arr_m;

@@ -6,7 +6,7 @@ CXXFLAGS = -O3 -std=c++17 -Wall
 
 # 目录设置
 ROOT_DIR = $(shell pwd)
-RUST_LIB_DIR = rotations_poset/target/release
+RUST_LIB_DIR = rotation_poset/target/release
 LEMON_DIR = lemon-1.3.1
 LEMON_BUILD_DIR = $(LEMON_DIR)/build/lemon
 
@@ -18,7 +18,7 @@ INCLUDES = -I. -I$(LEMON_DIR) -I$(LEMON_DIR)/build
 LIBDIRS = -L$(RUST_LIB_DIR) -L$(LEMON_BUILD_DIR)
 
 # 库文件
-LIBS = -lemon -lrotations_poset
+LIBS = -lemon -lrotation_poset
 
 # rpath 设置，避免需要设置 LD_LIBRARY_PATH
 RUST_LIB_RPATH = -Wl,-rpath,$(ROOT_DIR)/$(RUST_LIB_DIR)
@@ -68,143 +68,67 @@ ifeq ($(CARGO),)
     CARGO = $(shell test -f "$(HOME)/.cargo/bin/cargo" && echo "$(HOME)/.cargo/bin/cargo" || echo "")
 endif
 
-.PHONY: all total heuristic capacity_scaling network_simplex cost_scaling ssp_dijkstra \
+.PHONY: all rust-lib total heuristic capacity_scaling network_simplex cost_scaling ssp_dijkstra \
         poset_only save_poset cost_scaling_no_poset capacity_scaling_no_poset \
         network_simplex_no_poset ssp_dijkstra_no_poset heuristic_no_poset \
-        save_poset_shared solver_no_poset_shared clean rust-lib check-rust-lib help
+        save_poset_shared solver_no_poset_shared clean
 
 # 默认目标
 all: total
 
-help:
-	@echo "Available targets:"
-	@echo "  make total            - Compile total_test.cpp to 'total'"
-	@echo "  make heuristic        - Compile heuristic.cpp to 'heuristic'"
-	@echo "  make capacity_scaling - Compile capacity_scaling.cpp to 'capacity_scaling'"
-	@echo "  make network_simplex  - Compile network_simplex.cpp to 'network_simplex'"
-	@echo "  make cost_scaling     - Compile cost_scaling.cpp to 'cost_scaling'"
-	@echo "  make ssp_dijkstra     - Compile ssp_dijkstra.cpp to 'ssp_dijkstra'"
-	@echo "  make poset_only            - Compile poset_only.cpp (poset construction only)"
-	@echo "  make save_poset_shared     - Compile save_poset_shared.cpp (poset cache without flow)"
-	@echo "  make solver_no_poset_shared - Compile solver_no_poset_shared.cpp (method+flow from cached poset)"
-	@echo "  make clean            - Remove compiled binaries"
-	@echo "  make rust-lib         - Build Rust library"
+# 库文件（不含 LEMON，用于只依赖 rotation_poset 的目标）
+POSET_LIBS = -lrotation_poset
 
-# 检查 Rust 库是否存在
-check-rust-lib:
-	@if [ ! -f "$(RUST_LIB_DIR)/librotations_poset.so" ] && [ ! -f "$(RUST_LIB_DIR)/librotations_poset.a" ]; then \
-		echo "Rust library not found. Building..."; \
-		$(MAKE) rust-lib; \
-	fi
-
-# 构建 Rust 库
+# 构建 Rust 库（cargo 是增量的，源码不变时瞬间完成）
 rust-lib:
-	@echo "Building Rust library..."
-	@if [ -z "$(CARGO)" ] || [ ! -f "$(CARGO)" ]; then \
-		echo "Error: cargo not found. Please install Rust and Cargo."; \
-		echo "Run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"; \
-		exit 1; \
-	fi
-	@cd rotations_poset && $(CARGO) build --release
-	@if [ ! -f "$(RUST_LIB_DIR)/librotations_poset.so" ] && [ ! -f "$(RUST_LIB_DIR)/librotations_poset.a" ]; then \
-		echo "Error: Failed to build Rust library"; \
-		exit 1; \
-	fi
-	@echo "Rust library built successfully"
+	cd rotation_poset && cargo build --release
 
-# 编译 total
-total: check-rust-lib $(SOURCE)
-	@echo "Compiling $(SOURCE)..."
+# 带 LEMON 的目标
+total: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(TARGET)
-	@echo "Build complete: $(TARGET)"
 
-# 编译 heuristic
-heuristic: check-rust-lib $(HEURISTIC_SOURCE)
-	@echo "Compiling $(HEURISTIC_SOURCE)..."
+heuristic: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(HEURISTIC_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(HEURISTIC_TARGET)
-	@echo "Build complete: $(HEURISTIC_TARGET)"
 
-# 编译 capacity_scaling
-capacity_scaling: check-rust-lib $(CAPACITY_SCALING_SOURCE)
-	@echo "Compiling $(CAPACITY_SCALING_SOURCE)..."
+capacity_scaling: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(CAPACITY_SCALING_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(CAPACITY_SCALING_TARGET)
-	@echo "Build complete: $(CAPACITY_SCALING_TARGET)"
 
-# 编译 network_simplex
-network_simplex: check-rust-lib $(NETWORK_SIMPLEX_SOURCE)
-	@echo "Compiling $(NETWORK_SIMPLEX_SOURCE)..."
+network_simplex: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(NETWORK_SIMPLEX_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(NETWORK_SIMPLEX_TARGET)
-	@echo "Build complete: $(NETWORK_SIMPLEX_TARGET)"
 
-# 编译 cost_scaling
-cost_scaling: check-rust-lib $(COST_SCALING_SOURCE)
-	@echo "Compiling $(COST_SCALING_SOURCE)..."
+cost_scaling: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(COST_SCALING_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(COST_SCALING_TARGET)
-	@echo "Build complete: $(COST_SCALING_TARGET)"
 
-# 编译 ssp_dijkstra
-ssp_dijkstra: check-rust-lib $(SSP_DIJKSTRA_SOURCE)
-	@echo "Compiling $(SSP_DIJKSTRA_SOURCE)..."
+ssp_dijkstra: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SSP_DIJKSTRA_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(SSP_DIJKSTRA_TARGET)
-	@echo "Build complete: $(SSP_DIJKSTRA_TARGET)"
 
-# 编译 poset-only 程序（只需要 rotations_poset 库，不需要 LEMON）
-# 库文件（只使用 rotations_poset）
-POSET_LIBS = -lrotations_poset
-
-# 编译 poset_only（所有5种实现都使用相同的poset construction代码）
-poset_only: check-rust-lib $(POSET_ONLY_SOURCE)
-	@echo "Compiling $(POSET_ONLY_SOURCE)..."
-	$(CXX) $(CXXFLAGS) -I. $(POSET_ONLY_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(POSET_ONLY_TARGET)
-	@echo "Build complete: $(POSET_ONLY_TARGET)"
-
-# 编译 save_poset（保存poset结果到文件）
-save_poset: check-rust-lib $(SAVE_POSET_SOURCE)
-	@echo "Compiling $(SAVE_POSET_SOURCE)..."
-	$(CXX) $(CXXFLAGS) -I. $(SAVE_POSET_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(SAVE_POSET_TARGET)
-	@echo "Build complete: $(SAVE_POSET_TARGET)"
-
-# 编译 save_poset_shared（保存与 flow 解耦的 poset 文件）
-save_poset_shared: check-rust-lib $(SAVE_POSET_SHARED_SOURCE)
-	@echo "Compiling $(SAVE_POSET_SHARED_SOURCE)..."
-	$(CXX) $(CXXFLAGS) -I. $(SAVE_POSET_SHARED_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(SAVE_POSET_SHARED_TARGET)
-	@echo "Build complete: $(SAVE_POSET_SHARED_TARGET)"
-
-# 编译 cost_scaling_no_poset（跳过poset construction）
-cost_scaling_no_poset: check-rust-lib $(COST_SCALING_NO_POSET_SOURCE)
-	@echo "Compiling $(COST_SCALING_NO_POSET_SOURCE)..."
+cost_scaling_no_poset: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(COST_SCALING_NO_POSET_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(COST_SCALING_NO_POSET_TARGET)
-	@echo "Build complete: $(COST_SCALING_NO_POSET_TARGET)"
 
-# 编译 capacity_scaling_no_poset（跳过poset construction）
-capacity_scaling_no_poset: check-rust-lib $(CAPACITY_SCALING_NO_POSET_SOURCE)
-	@echo "Compiling $(CAPACITY_SCALING_NO_POSET_SOURCE)..."
+capacity_scaling_no_poset: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(CAPACITY_SCALING_NO_POSET_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(CAPACITY_SCALING_NO_POSET_TARGET)
-	@echo "Build complete: $(CAPACITY_SCALING_NO_POSET_TARGET)"
 
-# 编译 network_simplex_no_poset（跳过poset construction）
-network_simplex_no_poset: check-rust-lib $(NETWORK_SIMPLEX_NO_POSET_SOURCE)
-	@echo "Compiling $(NETWORK_SIMPLEX_NO_POSET_SOURCE)..."
+network_simplex_no_poset: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(NETWORK_SIMPLEX_NO_POSET_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(NETWORK_SIMPLEX_NO_POSET_TARGET)
-	@echo "Build complete: $(NETWORK_SIMPLEX_NO_POSET_TARGET)"
 
-# 编译 ssp_dijkstra_no_poset（跳过poset construction）
-ssp_dijkstra_no_poset: check-rust-lib $(SSP_DIJKSTRA_NO_POSET_SOURCE)
-	@echo "Compiling $(SSP_DIJKSTRA_NO_POSET_SOURCE)..."
+ssp_dijkstra_no_poset: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SSP_DIJKSTRA_NO_POSET_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(SSP_DIJKSTRA_NO_POSET_TARGET)
-	@echo "Build complete: $(SSP_DIJKSTRA_NO_POSET_TARGET)"
 
-# 编译 heuristic_no_poset（跳过poset construction，不需要LEMON）
-heuristic_no_poset: check-rust-lib $(HEURISTIC_NO_POSET_SOURCE)
-	@echo "Compiling $(HEURISTIC_NO_POSET_SOURCE)..."
-	$(CXX) $(CXXFLAGS) -I. $(HEURISTIC_NO_POSET_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(HEURISTIC_NO_POSET_TARGET)
-	@echo "Build complete: $(HEURISTIC_NO_POSET_TARGET)"
-
-# 编译 solver_no_poset_shared（从缓存 poset 读取，flow 走命令行参数）
-solver_no_poset_shared: check-rust-lib $(SOLVER_NO_POSET_SHARED_SOURCE)
-	@echo "Compiling $(SOLVER_NO_POSET_SHARED_SOURCE)..."
+solver_no_poset_shared: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SOLVER_NO_POSET_SHARED_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(SOLVER_NO_POSET_SHARED_TARGET)
-	@echo "Build complete: $(SOLVER_NO_POSET_SHARED_TARGET)"
+
+# 不需要 LEMON 的目标
+poset_only: rust-lib
+	$(CXX) $(CXXFLAGS) -I. $(POSET_ONLY_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(POSET_ONLY_TARGET)
+
+save_poset: rust-lib
+	$(CXX) $(CXXFLAGS) -I. $(SAVE_POSET_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(SAVE_POSET_TARGET)
+
+save_poset_shared: rust-lib
+	$(CXX) $(CXXFLAGS) -I. $(SAVE_POSET_SHARED_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(SAVE_POSET_SHARED_TARGET)
+
+heuristic_no_poset: rust-lib
+	$(CXX) $(CXXFLAGS) -I. $(HEURISTIC_NO_POSET_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(HEURISTIC_NO_POSET_TARGET)
 
 # 清理
 clean:

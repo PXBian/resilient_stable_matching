@@ -9,7 +9,7 @@
 #include <chrono>
 #include <fstream>
 #include <bits/stdc++.h>
-#include "rotations_poset/rotations_poset.h"
+#include "rotation_poset/rotation_poset.h"
 
 using namespace lemon;
 using namespace std;
@@ -20,8 +20,8 @@ int main(int argv, char** argc) {
     int flowAmount = stoi(argc[3]);
 
     // 使用一维数组存储，按行展开
-    size_t* arr_m = new size_t[n * n];
-    size_t* arr_w = new size_t[n * n];
+    int* arr_m = new int[n * n];
+    int* arr_w = new int[n * n];
     for (size_t i = 0; i < n * n; ++i) {
         arr_m[i] = 0;
         arr_w[i] = 0;
@@ -64,8 +64,10 @@ int main(int argv, char** argc) {
     auto poset_start = chrono::high_resolution_clock::now();
 
     // Construct the rotation poset
-    CPreferenceProfile pr = (CPreferenceProfile){ .men = arr_m, .women = arr_w, .len = n };
-    CRotationPoset rotation_poset = get_rotation_poset(&pr);
+    invert_matrix(arr_w, n);
+    RankingListMatrix men_matrix = { .data = arr_m, .n = n };
+    PositionMapMatrix women_matrix = { .data = arr_w, .n = n };
+    RotationDigraph rotation_poset = get_rotation_digraph(men_matrix, women_matrix);
 
     auto poset_end = chrono::high_resolution_clock::now();
     double poset_time = chrono::duration<double>(poset_end - poset_start).count();
@@ -77,32 +79,22 @@ int main(int argv, char** argc) {
 
     // Construct the forcing graph with info on arcs
     map<pair<int,int>, pair<int, int>> arc_infos;
-    CDependency* dependencies = rotation_poset.data;
+    Dependency* dependencies = rotation_poset.data;
     const int INF = 1e9;
     for (size_t i = 0; i < rotation_poset.len; ++i) {
-        CDependency dependency = dependencies[i];
-        int from = dependency.from;
-        int to = dependency.to;
-
-        pair<int,int> cur_pair = make_pair(from, to);
-        if (arc_infos.find(cur_pair) == arc_infos.end()) {
-            pair<int,int> rev_pair = make_pair(to, from);
-            arc_infos[rev_pair] = make_pair(0, INF);
-            if (dependency.gen_is_stable) {
-                arc_infos[cur_pair] = make_pair(1, 1);
-            }
-        } 
-        else {
-            if (dependency.gen_is_stable) {
-                arc_infos[cur_pair].second++;
-            }
+        Dependency dep = dependencies[i];
+        int from = dep.from;
+        int to = dep.to;
+        arc_infos[make_pair(to, from)] = make_pair(0, INF);
+        if (dep.capacity > 0) {
+            arc_infos[make_pair(from, to)] = make_pair(1, (int)dep.capacity);
         }
     }
 
     cout << "Number of arcs: " << arc_infos.size() << endl;
 
     // 现在可以安全地释放 rotation_poset
-    free_c_rotation_poset(rotation_poset);
+    free_rotation_digraph(rotation_poset);
     
     // 提前释放输入数组，减少内存占用
     delete[] arr_m;
