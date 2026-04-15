@@ -51,7 +51,8 @@ bool dijkstraWithPotentials(vector<vector<Edge>> &G,
         pq.pop();
 
         if (d > dist[u]) continue;
-        
+        if (u == t) break;  // t's distance is finalized, no need to explore further
+
         for (int i = 0; i < (int)G[u].size(); ++i) {
             Edge &e = G[u][i];
             
@@ -89,19 +90,13 @@ pair<int, int> minCost(vector<vector<Edge>> &G, int s, int t, int max_flow) {
             break;
         }
         
-        // Find bottleneck capacity on the path t -> s
+        // Find bottleneck capacity and calculate path cost in one pass
         int path_flow = max_flow - total_flow;
-        for (int v = t; v != s; v = parent[v]) {
-            int u = parent[v];
-            int edge_idx = parent_edge[v];
-            path_flow = min(path_flow, G[u][edge_idx].cap);
-        }
-        
-        // Calculate actual path cost（Use original costs, not reduced costs）
         int path_cost = 0;
         for (int v = t; v != s; v = parent[v]) {
             int u = parent[v];
             int edge_idx = parent_edge[v];
+            path_flow = min(path_flow, G[u][edge_idx].cap);
             path_cost += G[u][edge_idx].cost;
         }
         
@@ -186,20 +181,20 @@ int main(int argv, char** argc) {
     invert_matrix(arr_w, n);
     RankingListMatrix men_matrix = { .data = arr_m, .n = n };
     PositionMapMatrix women_matrix = { .data = arr_w, .n = n };
-    RotationDigraph rotation_poset = get_rotation_digraph(men_matrix, women_matrix);
+    RotationDigraph rotation_poset = get_rotation_digraph(men_matrix, women_matrix, 0);
 
     auto poset_end = chrono::high_resolution_clock::now();
     double poset_time = chrono::duration<double>(poset_end - poset_start).count();
 
-    std::cout << "Number of dependencies: " << rotation_poset.len << std::endl;
+    std::cout << "Number of dependencies: " << rotation_poset.n_dependencies << std::endl;
     std::cout << "Number of rotations: " << rotation_poset.n_rotations << std::endl;
 
     size_t n_rotations = rotation_poset.n_rotations;
 
     // Construct the forcing graph with info on arcs
     map<pair<int,int>, pair<int, int>> arc_infos;
-    Dependency* dependencies = rotation_poset.data;
-    for (size_t i = 0; i < rotation_poset.len; ++i) {
+    Dependency* dependencies = rotation_poset.dependencies_list;
+    for (size_t i = 0; i < rotation_poset.n_dependencies; ++i) {
         Dependency dep = dependencies[i];
         int from = dep.from;
         int to = dep.to;
@@ -306,4 +301,3 @@ int main(int argv, char** argc) {
 
     return 0;
 }
-

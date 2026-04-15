@@ -25,7 +25,8 @@ declare -a datasets=(
     # "ADM_new"
     # "FOOD"
     # "RAP"
-    "BIKE"
+    # "BIKE"
+    "random"
 )
 
 

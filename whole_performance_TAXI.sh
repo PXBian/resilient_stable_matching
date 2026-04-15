@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --mem=350G
+
 
 # 加载 Rust 环境（如果存在）
 if [ -f "$HOME/.cargo/env" ]; then
@@ -15,7 +15,7 @@ gunzip data/*.gz 2>/dev/null
 # 编译所有需要的程序
 make capacity_scaling
 make network_simplex
-# make cost_scaling
+make cost_scaling
 make ssp_dijkstra
 make heuristic
 
@@ -83,8 +83,8 @@ declare -a test_cases=(
 
 # 定义方法数组
 declare -a methods=(
+    "heuristic"
     "capacity_scaling"
-    # "heuristic"
     "network_simplex"
     "ssp_dijkstra"
     # "cost_scaling"
@@ -115,13 +115,13 @@ for dataset in "${datasets[@]}"; do
             echo "Running $method for dataset=$dataset, n=$n, flowAmount=$flowAmount"
             
             # 根据方法名称执行相应的命令
-            # if [ "$method" = "cost_scaling" ]; then
-            #     # CostScaling 使用 timeout
-            #     (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling "$input_file" "$n" "$flowAmount") &> new_output/cost_scaling_${dataset_lower}_rand_${n}_${flowAmount}.txt
-            # else
+            if [ "$method" = "cost_scaling" ]; then
+                # CostScaling 使用 timeout
+                (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling "$input_file" "$n" "$flowAmount") &> runtime_output/cost_scaling_${dataset_lower}_rand_${n}_${flowAmount}.txt
+            else
                 # 其他方法不使用 timeout
                 /usr/bin/time -v ./${method} "$input_file" "$n" "$flowAmount" &> runtime_output/${method}_${dataset_lower}_rand_${n}_${flowAmount}.txt
-            # fi
+            fi
         done
         
         echo "Completed all test cases for method: $method"

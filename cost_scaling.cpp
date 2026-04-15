@@ -66,21 +66,21 @@ int main(int argv, char** argc) {
     invert_matrix(arr_w, n);
     RankingListMatrix men_matrix = { .data = arr_m, .n = n };
     PositionMapMatrix women_matrix = { .data = arr_w, .n = n };
-    RotationDigraph rotation_poset = get_rotation_digraph(men_matrix, women_matrix);
+    RotationDigraph rotation_poset = get_rotation_digraph(men_matrix, women_matrix, 0);
 
     auto poset_end = chrono::high_resolution_clock::now();
     double poset_time = chrono::duration<double>(poset_end - poset_start).count();
 
-    std::cout << "Number of dependencies: " << rotation_poset.len << std::endl;
+    std::cout << "Number of dependencies: " << rotation_poset.n_dependencies << std::endl;
     std::cout << "Number of rotations: " << rotation_poset.n_rotations << std::endl;
 
     size_t n_rotations = rotation_poset.n_rotations;
 
     // Construct the forcing graph with info on arcs
     map<pair<int,int>, pair<int, int>> arc_infos;
-    Dependency* dependencies = rotation_poset.data;
+    Dependency* dependencies = rotation_poset.dependencies_list;
     const int INF = 1e9;
-    for (size_t i = 0; i < rotation_poset.len; ++i) {
+    for (size_t i = 0; i < rotation_poset.n_dependencies; ++i) {
         Dependency dep = dependencies[i];
         int from = dep.from;
         int to = dep.to;

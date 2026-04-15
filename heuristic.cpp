@@ -16,7 +16,6 @@ int main(int argv, char** argc) {
     size_t n = stoi(argc[2]);
     int flowAmount = stoi(argc[3]);
 
-    // 使用一维数组存储，按行展开
     int* arr_m = new int[n * n];
     int* arr_w = new int[n * n];
     for (size_t i = 0; i < n * n; ++i) {
@@ -64,25 +63,40 @@ int main(int argv, char** argc) {
     invert_matrix(arr_w, n);
     RankingListMatrix men_matrix = { .data = arr_m, .n = n };
     PositionMapMatrix women_matrix = { .data = arr_w, .n = n };
-    RotationDigraph rotation_poset = get_rotation_digraph(men_matrix, women_matrix);
+    RotationDigraph rotation_poset = get_rotation_digraph(men_matrix, women_matrix, 1);
 
     auto poset_end = chrono::high_resolution_clock::now();
     double poset_time = chrono::duration<double>(poset_end - poset_start).count();
 
-    std::cout << "Number of dependencies: " << rotation_poset.len << std::endl;
+    std::cout << "Number of dependencies: " << rotation_poset.n_dependencies << std::endl;
     std::cout << "Number of rotations: " << rotation_poset.n_rotations << std::endl;
 
     // Run heuristic algorithm before freeing rotation_poset
     auto heuristic_start = chrono::high_resolution_clock::now();
 
+    // Count how many non-artificial rotations each man appears in.
+    // Rotation 0 is an artificial initial rotation containing every man once,
+    // while the final rotation n_rotations - 1 introduces no pairs.
+    vector<size_t> man_rotation_count(n, 0);
+    if (rotation_poset.starting_indexes != nullptr && rotation_poset.pairs_list != nullptr) {
+        for (size_t r = 1; r + 1 < rotation_poset.n_rotations; ++r) {
+            size_t begin = rotation_poset.starting_indexes[r];
+            size_t end = rotation_poset.starting_indexes[r + 1];
+            for (size_t idx = begin; idx < end; ++idx) {
+                StablePair pair = rotation_poset.pairs_list[idx];
+                if (pair.man >= 0 && static_cast<size_t>(pair.man) < n) {
+                    man_rotation_count[pair.man]++;
+                }
+            }
+        }
+    }
+
     // Step 1: For each rotation, accumulate stable out-capacity.
-    // NOTE: the new API does not expose per-generator (per-man) info;
-    // per-rotation stable capacity is used as a proxy instead.
     size_t n_rot = rotation_poset.n_rotations;
     vector<size_t> rotation_capacity(n_rot, 0);
 
-    Dependency* deps = rotation_poset.data;
-    for (size_t i = 0; i < rotation_poset.len; ++i) {
+    Dependency* deps = rotation_poset.dependencies_list;
+    for (size_t i = 0; i < rotation_poset.n_dependencies; ++i) {
         Dependency dep = deps[i];
         if (dep.capacity > 0) {
             rotation_capacity[dep.from] += dep.capacity;
@@ -110,11 +124,9 @@ int main(int argv, char** argc) {
     double heuristic_run_time = chrono::duration<double>(heuristic_end - heuristic_start).count();
 
     size_t n_rotations = n_rot;
-    size_t arc_num = rotation_poset.len;
-    // 现在可以安全地释放 rotation_poset
+    size_t arc_num = rotation_poset.n_dependencies;
     free_rotation_digraph(rotation_poset);
-    
-    // 提前释放输入数组，减少内存占用
+
     delete[] arr_m;
     delete[] arr_w;
 
@@ -130,6 +142,12 @@ int main(int argv, char** argc) {
          << "n = " << n
          << ", flow = " << flowAmount
          << ", total_cost = " << heuristic_cost << "\n";
+
+    // cout << "man_rotation_count (excluding artificial rotation 0):";
+    // for (size_t m = 0; m < n; ++m) {
+    //     cout << " " << m << ":" << man_rotation_count[m];
+    // }
+    // cout << "\n";
 
     // Runtime statistics
     cout << "\n///////////////////////////// RUNTIME STATISTICS //////////////////////////////" << endl;
@@ -151,7 +169,7 @@ int main(int argv, char** argc) {
             if (csv.tellp() == 0) {
                 csv << "dataset,method,n,flowAmount,total_cost,rotations_num,arc_num,poset_time,algorithm_runtime,graph_plus_algo_time,total_program_time\n";
             }
-            double graph_plus_algo_time = heuristic_run_time;  // 没有单独的图构建阶段
+            double graph_plus_algo_time = heuristic_run_time; 
             csv << dataset << ",heuristic," << n << "," << flowAmount << "," << heuristic_cost
                 << "," << n_rotations << "," << arc_num
                 << "," << poset_time << "," << heuristic_run_time << "," << graph_plus_algo_time << "," << total_time << "\n";
@@ -161,4 +179,3 @@ int main(int argv, char** argc) {
 
     return 0;
 }
-
