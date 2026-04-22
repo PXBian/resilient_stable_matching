@@ -43,7 +43,7 @@ set -eu
 # python3 gen_instance_ADM_augmented_new.py --csv raw/ADM_Norway_raw.csv -n 10000 --seed 42 --temp-x 0.9 --temp-y 0.9 --out-txt  ADM_new_10000_instance.txt
 # python3 gen_instance_ADM_augmented_new.py --csv raw/ADM_Norway_raw.csv -n 20000 --seed 42 --temp-x 0.9 --temp-y 0.9 --out-txt  ADM_new_20000_instance.txt
 # python3 gen_instance_ADM_augmented_new.py --csv raw/ADM_Norway_raw.csv -n 30000 --seed 42 --temp-x 0.9 --temp-y 0.9 --out-txt  ADM_new_30000_instance.txt
-# # python3 gen_instance_ADM_augmented_new.py --csv raw/ADM_Norway_raw.csv -n 40000 --seed 42 --temp-x 0.9 --temp-y 0.9 --out-txt  ADM_new_40000_instance.txt
+# python3 gen_instance_ADM_augmented_new.py --csv raw/ADM_Norway_raw.csv -n 40000 --seed 42 --temp-x 0.9 --temp-y 0.9 --out-txt  ADM_new_40000_instance.txt
 # # python3 gen_instance_ADM_augmented_new.py --csv raw/ADM_Norway_raw.csv -n 50000 --seed 42 --temp-x 0.9 --temp-y 0.9 --out-txt  ADM_new_50000_instance.txt
 
 

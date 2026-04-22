@@ -91,33 +91,19 @@ int main(int argv, char** argc) {
         }
     }
 
-    // Step 1: For each rotation, accumulate stable out-capacity.
     size_t n_rot = rotation_poset.n_rotations;
-    vector<size_t> rotation_capacity(n_rot, 0);
 
-    Dependency* deps = rotation_poset.dependencies_list;
-    for (size_t i = 0; i < rotation_poset.n_dependencies; ++i) {
-        Dependency dep = deps[i];
-        if (dep.capacity > 0) {
-            rotation_capacity[dep.from] += dep.capacity;
-        }
-    }
+    // Step 1: Sort men by |L(m)| ascending
+    vector<size_t> sorted_counts = man_rotation_count;
+    sort(sorted_counts.begin(), sorted_counts.end());
 
-    // Step 2: Collect only rotations with stable out-capacity > 0, then sort ascending
-    vector<size_t> nonzero_caps;
-    for (size_t r = 0; r < n_rot; ++r) {
-        if (rotation_capacity[r] > 0) {
-            nonzero_caps.push_back(rotation_capacity[r]);
-        }
-    }
-    sort(nonzero_caps.begin(), nonzero_caps.end());
-
-    // Step 3: Sum the flowAmount smallest nonzero capacities as heuristic cost
+    // Step 2: Select flowAmount men with shortest rotation lists and delete all their stable edges.
+    // flowAmount = number of men to eliminate (= n - target_matching_size).
+    // cost per man = |L(m)| + 1 (number of stable edges incident to that man)
     int heuristic_cost = 0;
-    int selected_count = min(flowAmount, (int)nonzero_caps.size());
-
-    for (int i = 0; i < selected_count; ++i) {
-        heuristic_cost += nonzero_caps[i];
+    int to_select = min(flowAmount, (int)n);
+    for (int i = 0; i < to_select; ++i) {
+        heuristic_cost += (int)sorted_counts[i] + 1;
     }
 
     auto heuristic_end = chrono::high_resolution_clock::now();

@@ -1,6 +1,5 @@
 #!/bin/bash
-#SBATCH --mem=350G
-#SBATCH --time=2-00:00:00
+
 
 # 加载 Rust 环境（如果存在）
 if [ -f "$HOME/.cargo/env" ]; then
@@ -10,7 +9,7 @@ fi
 # 设置超时时间：任何任务运行超过1小时将被终止并跳过
 TIMEOUT_DURATION="1h"
 
-mkdir -p runtime_output
+mkdir -p new_output
 gunzip data/*.gz 2>/dev/null
 
 # 编译所有需要的程序
@@ -22,58 +21,59 @@ make heuristic
 
 # 定义数据集
 declare -a datasets=(
+    "random"
     # "TAXI_new"
-    # "ADM_new"
     # "FOOD"
     # "RAP"
-    "BIKE"
+    # "BIKE"
+    # "ADM_new"
 )
 
 
 # 定义测试用例
 declare -a test_cases=(
-    "10000 1"
+    # "10000 1"
     # "10000 5000"
-    "10000 10000"
-    "20000 1"
+    # "10000 10000"
+    # "20000 1"
     # "20000 5000"
-    "20000 10000"
+    # "20000 10000"
     # "20000 15000"
-    "20000 20000"
-    "30000 1"
+    # "20000 20000"
+    # "30000 1"
     # "30000 5000"
-    "30000 10000"
+    # "30000 10000"
     # "30000 15000"
-    "30000 20000"
+    # "30000 20000"
     # "30000 25000"
-    "30000 30000"
-    "40000 1"
+    # "30000 30000"
+    # "40000 1"
     # "40000 5000"
-    "40000 10000"
+    # "40000 10000"
     # "40000 15000"
-    "40000 20000"
+    # "40000 20000"
     # "40000 25000"
-    "40000 30000"
+    # "40000 30000"
     # "40000 35000"
-    "40000 40000"
-    "50000 1"
+    # "40000 40000"
+    # "50000 1"
     # "50000 5000"
     "50000 10000"
     # "50000 15000"
-    "50000 20000"
+    # "50000 20000"
     # "50000 25000"
-    "50000 30000"
+    # "50000 30000"
     # "50000 35000"
-    "50000 40000"
+    # "50000 40000"
     # "50000 45000"
-    "50000 50000"
-    "60000 1"
+    # "50000 50000"
+    # "60000 1"
     # "60000 5000"
-    "60000 10000"
+    # "60000 10000"
     # "60000 15000"
-    "60000 20000"
+    # "60000 20000"
     # "60000 25000"
-    "60000 30000"
+    # "60000 30000"
     # "60000 35000"
     "60000 40000"
     # "60000 45000"
@@ -84,9 +84,9 @@ declare -a test_cases=(
 
 # 定义方法数组
 declare -a methods=(
-    "capacity_scaling"
-    "heuristic"
-    "network_simplex"
+    # "heuristic"
+    # "capacity_scaling"
+    # "network_simplex"
     "ssp_dijkstra"
     # "cost_scaling"
 )
@@ -121,7 +121,7 @@ for dataset in "${datasets[@]}"; do
             #     (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling "$input_file" "$n" "$flowAmount") &> new_output/cost_scaling_${dataset_lower}_rand_${n}_${flowAmount}.txt
             # else
                 # 其他方法不使用 timeout
-                /usr/bin/time -v ./${method} "$input_file" "$n" "$flowAmount" &> test_output/${method}_${dataset_lower}_rand_${n}_${flowAmount}.txt
+                /usr/bin/time -v ./${method} "$input_file" "$n" "$flowAmount" &> new_output/${method}_${dataset_lower}_rand_${n}_${flowAmount}.txt
             # fi
         done
         
