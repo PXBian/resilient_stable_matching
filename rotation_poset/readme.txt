@@ -45,3 +45,16 @@ If you only need the topology of the digraph without specific information about 
 In this way, the attribute n_pairs will be set to 0, and the pointers pairs_list and starting_indexes will be null.
 The other three attributes remain unchanged from the previous version.
 If you need the complete information about rotations to compute any heuristics, set it to 1.
+
+
+=== COMPETITOR UPDATE ===
+
+There are new data structures to represent the competitor graph, named Stable Pairs Graph.
+The edges of this graph are represented trough the data structure "Arc", that has the integer attributes "from", "to", and "cost" (always 0 or 1).
+The output data structure is named "StablePairsGraph" and its attributes are an integer "n_vertices", an integer "n_arcs", and a pointer Arc* "arcs_list" that represents an array of length n_arcs.
+
+The function "get_stable_pairs_graph" takes as input the RotationDigraph structure, which MUST be computed via the function get_rotation_digraph called with the argument complete_data set to 1.
+The function "free_stable_pairs_graph(StablePairsGraph spgraph)" frees the memory allocated for spgraph.
+
+The capacity for every edge of the stable pairs graph must be considered 1 if the cost is 1 and infinite if the cost is 0.
+
