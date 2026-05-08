@@ -50,7 +50,7 @@ int main() {
     std::cout << "Arcs in stable pairs graph:" << std::endl;
     for (size_t i = 0; i < stable_pairs_graph.n_arcs; i++) {
         Arc arc = stable_pairs_graph.arcs_list[i];
-        std::cout << arc.from << " -> " << arc.to << " (cost: " << arc.cost << ")" << std::endl;
+        std::cout << arc.from << " -> " << arc.to << " (cost: " << (int)arc.cost << ")" << std::endl;
     }
 
 

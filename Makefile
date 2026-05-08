@@ -36,6 +36,8 @@ COST_SCALING_TARGET = cost_scaling
 COST_SCALING_SOURCE = cost_scaling.cpp
 SSP_DIJKSTRA_TARGET = ssp_dijkstra
 SSP_DIJKSTRA_SOURCE = ssp_dijkstra.cpp
+COMPETITOR_TARGET = competitor
+COMPETITOR_SOURCE = competitor.cpp
 
 # Poset-only target (only need rotations_poset library, not LEMON)
 # All 5 implementations use the same poset construction code, so we only need one executable
@@ -69,7 +71,7 @@ ifeq ($(CARGO),)
 endif
 
 .PHONY: all rust-lib total heuristic capacity_scaling network_simplex cost_scaling ssp_dijkstra \
-        poset_only save_poset cost_scaling_no_poset capacity_scaling_no_poset \
+        competitor poset_only save_poset cost_scaling_no_poset capacity_scaling_no_poset \
         network_simplex_no_poset ssp_dijkstra_no_poset heuristic_no_poset \
         save_poset_shared solver_no_poset_shared clean
 
@@ -102,6 +104,9 @@ cost_scaling: rust-lib
 ssp_dijkstra: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SSP_DIJKSTRA_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(SSP_DIJKSTRA_TARGET)
 
+competitor: rust-lib
+	$(CXX) $(CXXFLAGS) -I. $(COMPETITOR_SOURCE) -L$(RUST_LIB_DIR) $(POSET_LIBS) $(RUST_LIB_RPATH) -o $(COMPETITOR_TARGET)
+
 cost_scaling_no_poset: rust-lib
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(COST_SCALING_NO_POSET_SOURCE) $(LIBDIRS) $(LIBS) $(RUST_LIB_RPATH) -o $(COST_SCALING_NO_POSET_TARGET)
 
@@ -132,7 +137,7 @@ heuristic_no_poset: rust-lib
 
 # 清理
 clean:
-	rm -f $(TARGET) $(HEURISTIC_TARGET) $(CAPACITY_SCALING_TARGET) $(NETWORK_SIMPLEX_TARGET) $(COST_SCALING_TARGET) $(SSP_DIJKSTRA_TARGET) \
+	rm -f $(TARGET) $(HEURISTIC_TARGET) $(CAPACITY_SCALING_TARGET) $(NETWORK_SIMPLEX_TARGET) $(COST_SCALING_TARGET) $(SSP_DIJKSTRA_TARGET) $(COMPETITOR_TARGET) \
 	      $(POSET_ONLY_TARGET) $(SAVE_POSET_TARGET) \
 	      $(SAVE_POSET_SHARED_TARGET) $(SOLVER_NO_POSET_SHARED_TARGET) \
 	      $(COST_SCALING_NO_POSET_TARGET) $(CAPACITY_SCALING_NO_POSET_TARGET) \

@@ -39,9 +39,10 @@ typedef struct {
 } PositionMapMatrix;
 
 typedef struct {
-    int from; 
-    int to;
-    int cost;
+    unsigned int from;
+    unsigned int to;
+    unsigned char cost; /* matches Rust u8: 0=infinite capacity, 1=unit capacity */
+    unsigned char _pad[3];
 } Arc;
 
 typedef struct {

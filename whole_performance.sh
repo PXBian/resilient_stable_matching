@@ -9,7 +9,7 @@ fi
 # 设置超时时间：任何任务运行超过1小时将被终止并跳过
 TIMEOUT_DURATION="1h"
 
-mkdir -p new_output
+mkdir -p output_2
 gunzip data/*.gz 2>/dev/null
 
 # 编译所有需要的程序
@@ -21,26 +21,29 @@ make heuristic
 
 # 定义数据集
 declare -a datasets=(
-    "random"
-    # "TAXI_new"
-    # "FOOD"
-    # "RAP"
-    # "BIKE"
-    # "ADM_new"
+    # "random"
+    "TAXI_new"
+    "FOOD"
+    "RAP"
+    "BIKE"
+    "ADM_new"
 )
 
 
 # 定义测试用例
 declare -a test_cases=(
     # "10000 1"
+    "10000 1000"
     # "10000 5000"
     # "10000 10000"
     # "20000 1"
+    "20000 1000"
     # "20000 5000"
     # "20000 10000"
     # "20000 15000"
     # "20000 20000"
     # "30000 1"
+    "30000 1000"
     # "30000 5000"
     # "30000 10000"
     # "30000 15000"
@@ -48,6 +51,7 @@ declare -a test_cases=(
     # "30000 25000"
     # "30000 30000"
     # "40000 1"
+    "40000 1000"
     # "40000 5000"
     # "40000 10000"
     # "40000 15000"
@@ -57,8 +61,9 @@ declare -a test_cases=(
     # "40000 35000"
     # "40000 40000"
     # "50000 1"
+    "50000 1000"
     # "50000 5000"
-    "50000 10000"
+    # "50000 10000"
     # "50000 15000"
     # "50000 20000"
     # "50000 25000"
@@ -68,6 +73,7 @@ declare -a test_cases=(
     # "50000 45000"
     # "50000 50000"
     # "60000 1"
+    "60000 1000"
     # "60000 5000"
     # "60000 10000"
     # "60000 15000"
@@ -75,18 +81,18 @@ declare -a test_cases=(
     # "60000 25000"
     # "60000 30000"
     # "60000 35000"
-    "60000 40000"
+    # "60000 40000"
     # "60000 45000"
-    "60000 50000"
+    # "60000 50000"
     # "60000 55000"
-    "60000 60000"
+    # "60000 60000"
 )
 
 # 定义方法数组
 declare -a methods=(
-    # "heuristic"
-    # "capacity_scaling"
-    # "network_simplex"
+    "heuristic"
+    "capacity_scaling"
+    "network_simplex"
     "ssp_dijkstra"
     # "cost_scaling"
 )
@@ -118,10 +124,10 @@ for dataset in "${datasets[@]}"; do
             # 根据方法名称执行相应的命令
             # if [ "$method" = "cost_scaling" ]; then
             #     # CostScaling 使用 timeout
-            #     (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling "$input_file" "$n" "$flowAmount") &> new_output/cost_scaling_${dataset_lower}_rand_${n}_${flowAmount}.txt
+            #     (timeout $TIMEOUT_DURATION /usr/bin/time -v ./cost_scaling "$input_file" "$n" "$flowAmount") &> output_2/cost_scaling_${dataset_lower}_rand_${n}_${flowAmount}.txt
             # else
                 # 其他方法不使用 timeout
-                /usr/bin/time -v ./${method} "$input_file" "$n" "$flowAmount" &> new_output/${method}_${dataset_lower}_rand_${n}_${flowAmount}.txt
+                /usr/bin/time -v ./${method} "$input_file" "$n" "$flowAmount" &> output_2/${method}_${dataset_lower}_rand_${n}_${flowAmount}.txt
             # fi
         done
         

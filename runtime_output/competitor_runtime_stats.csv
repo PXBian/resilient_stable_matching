@@ -1,0 +1,13 @@
+dataset,method,n,flowAmount,total_cost,rotations_num,arc_num,poset_time,algorithm_runtime,graph_plus_algo_time,total_program_time
+test,competitor,7,1,-1073741831,0,103,9.1548e-05,2.3665e-05,4.6276e-05,0.000409868
+test,competitor,7,1,7,0,103,2.7805e-05,7.123e-06,1.328e-05,0.000129114
+test,competitor,7,1,7,0,103,3.2709e-05,1.6711e-05,2.4336e-05,0.000160171
+test,competitor,7,1,7,0,103,1.9228e-05,5.386e-06,8.688e-06,8.6512e-05
+test,competitor,7,1,7,0,103,4.1947e-05,1.2892e-05,3.0975e-05,0.000174798
+test,competitor,7,1,7,0,103,4.6189e-05,1.2381e-05,2.5624e-05,0.000193218
+test,competitor,7,1,2,0,103,3.0137e-05,2.515e-06,1.0194e-05,0.000105648
+test,competitor,7,1,2,0,103,3.2111e-05,1.194e-06,5.6e-06,0.000103824
+test,competitor,7,1,2,0,103,3.4292e-05,1.39e-06,6.765e-06,0.000109277
+test,competitor,7,1,2,8,103,4.2612e-05,1.525e-06,7.439e-06,0.000154475
+test,competitor,7,1,2,8,103,2.4454e-05,7.82e-07,3.947e-06,8.4205e-05
+test,competitor,7,1,2,8,103,2.6241e-05,7.66e-07,4.236e-06,9.5106e-05
