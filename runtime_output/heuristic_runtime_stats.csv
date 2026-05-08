@@ -1,3 +1,0 @@
-dataset,method,n,flowAmount,total_cost,rotations_num,arc_num,poset_time,algorithm_runtime,graph_plus_algo_time,total_program_time
-test,heuristic,7,1,2,8,19,2.8262e-05,6.01e-07,6.01e-07,4.7444e-05
-test,heuristic,7,1,2,8,19,2.1221e-05,5.52e-07,5.52e-07,3.3717e-05

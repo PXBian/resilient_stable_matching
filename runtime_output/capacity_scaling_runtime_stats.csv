@@ -1,7 +1,0 @@
-dataset,method,n,flowAmount,total_cost,rotations_num,arc_num,poset_time,algorithm_runtime,graph_plus_algo_time,total_program_time
-test,capacity_scaling,7,1,2,8,34,2.2283e-05,5.985e-06,1.2402e-05,7.1975e-05
-test,capacity_scaling,7,1,2,8,34,3.5464e-05,1.4766e-05,2.7797e-05,0.000141575
-test,capacity_scaling,7,1,2,8,34,3.9817e-05,1.4358e-05,2.3428e-05,0.000151228
-test,capacity_scaling,7,1,2,8,34,3.1966e-05,5.973e-06,1.3163e-05,9.0224e-05
-test,capacity_scaling,7,1,2,8,34,4.0949e-05,1.132e-05,2.4231e-05,0.00014076
-test,capacity_scaling,7,1,2,8,34,3.9479e-05,5.952e-06,1.3164e-05,0.000102092

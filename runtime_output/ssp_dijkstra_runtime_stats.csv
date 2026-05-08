@@ -1,2 +1,0 @@
-dataset,method,n,flowAmount,total_cost,rotations_num,arc_num,poset_time,algorithm_runtime,graph_plus_algo_time,total_program_time
-test,ssp_dijkstra,7,1,2,8,34,3.1051e-05,2.219e-06,6.555e-06,8.9622e-05

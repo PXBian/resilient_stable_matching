@@ -1,3 +1,0 @@
-dataset,method,n,flowAmount,total_cost,rotations_num,arc_num,poset_time,algorithm_runtime,graph_plus_algo_time,total_program_time
-test,network_simplex,7,1,2,8,34,2.4343e-05,7.075e-06,1.3816e-05,8.0452e-05
-test,network_simplex,7,1,2,8,34,2.1756e-05,6.768e-06,1.2943e-05,6.9719e-05
