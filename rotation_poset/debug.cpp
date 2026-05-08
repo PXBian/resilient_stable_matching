@@ -43,6 +43,18 @@ int main() {
         std::cout << rotation_count << " " << pair.rem_rotation << " " << pair.man << " " << pair.woman << std::endl;
     }
 
+    StablePairsGraph stable_pairs_graph = get_stable_pairs_graph(digraph);
+
+    std::cout << "Number of vertices in stable pairs graph: " << stable_pairs_graph.n_vertices << std::endl;
+    std::cout << "Number of arcs in stable pairs graph: " << stable_pairs_graph.n_arcs << std::endl;
+    std::cout << "Arcs in stable pairs graph:" << std::endl;
+    for (size_t i = 0; i < stable_pairs_graph.n_arcs; i++) {
+        Arc arc = stable_pairs_graph.arcs_list[i];
+        std::cout << arc.from << " -> " << arc.to << " (cost: " << arc.cost << ")" << std::endl;
+    }
+
+
     free_rotation_digraph(digraph);
+    free_stable_pairs_graph(stable_pairs_graph);
     return 0;
 }
