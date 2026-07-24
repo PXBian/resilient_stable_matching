@@ -69,7 +69,7 @@ FFK only supports RPP:
 ./competitor <input_file> <n>
 ```
 
-## Reproduce the Test Case
+## Examples Using the Test Case
 
 Build and run all implementations for RPP:
 
