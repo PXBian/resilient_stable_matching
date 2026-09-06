@@ -1,4 +1,4 @@
-# Preference Resilience in Stable Matching
+# Preference Resilience for Stable Matching
 
 This repository contains the implementations used in our experimental evaluation of RPP and $\tau$-RPP.
 
@@ -19,6 +19,10 @@ sh pre-install.sh
 ```
 
 The Rust library in `rotation_poset/` is built automatically by the Makefile.
+
+## Experimental Data
+
+The full experimental datasets used in our experiments are available [here](https://u-drive.unipi.it/index.php/s/rfK2HCcXPJJLtjW).
 
 ## Implementations
 
