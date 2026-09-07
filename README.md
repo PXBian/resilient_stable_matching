@@ -24,6 +24,17 @@ The Rust library in `rotation_poset/` is built automatically by the Makefile.
 
 The full experimental datasets used in our experiments are available [here](https://u-drive.unipi.it/index.php/s/rfK2HCcXPJJLtjW).
 
+Files are named `<prefix>_<n>_instance.txt`, where `<n>` is the number of agents on each side. The file prefixes correspond to the dataset names used in the paper as follows:
+
+| File prefix | Dataset |
+|---|---|
+| `FOOD` | Food |
+| `BIKE` | Bike |
+| `TAXI` | Taxi |
+| `RAP` | RAP |
+| `ADM` | NOR |
+| `random` | Hard |
+
 ## Implementations
 
 | Algorithm | Source and binary | Build target | Arguments |
